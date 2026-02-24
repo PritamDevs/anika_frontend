@@ -1,0 +1,31 @@
+/* ===== CSS RESET (MANDATORY) ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ===== ROOT SETUP ===== */
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+/* ===== BASE BODY STYLE ===== */
+body {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  background-color: #ffffff;
+}
+
+/* ===== REMOVE VITE DEMO STYLES ===== */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
