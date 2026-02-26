@@ -89,6 +89,51 @@ const Customers = () => {
     fetchCustomers();
   };
 
+  const exportCustomersToCSV = () => {
+  if (!filteredCustomers.length) {
+    alert("No customers found");
+    return;
+  }
+
+  const escapeCSV = (field) => {
+    if (field === null || field === undefined) return "";
+    const str = String(field);
+    return `"${str.replace(/"/g, '""')}"`;
+  };
+
+  const headers = [
+    "Name",
+    "Contact",
+    "Address",
+    "Total Purchase",
+    "Total Paid",
+    "Due Amount"
+  ];
+
+  const rows = filteredCustomers.map(c => [
+    c.name,
+    c.contact,
+    c.address || "",
+    c.totalPurchase ?? 0,
+    c.totalPaid ?? 0,
+    c.dueAmount ?? 0
+  ]);
+
+  const csvRows = [
+    headers.map(escapeCSV).join(","),
+    ...rows.map(row => row.map(escapeCSV).join(","))
+  ];
+
+  const csvContent = csvRows.join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+
+  link.href = URL.createObjectURL(blob);
+  link.download = "Customer_List.csv";
+  link.click();
+};
+
   const filteredCustomers = customers.filter(c =>
     c.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -111,6 +156,9 @@ const Customers = () => {
           />
           <button style={styles.addButton} onClick={openAddModal}>
             + Add Customer
+          </button>
+          <button style={styles.exportBtn} onClick={exportCustomersToCSV}>
+          📥 Export CSV
           </button>
         </div>
       </div>
@@ -287,6 +335,15 @@ const styles = {
     borderRadius: "10px",
     cursor: "pointer",
     fontWeight: "bold"
+  },
+  exportBtn: {
+    padding: "10px 20px",
+    backgroundColor: "#4a6b82",
+    color: "white",
+    border: "none",
+    borderRadius: "10px",
+   cursor: "pointer",
+   fontWeight: "bold"
   },
   tableWrapper: {
     backgroundColor: "#d1dee2",

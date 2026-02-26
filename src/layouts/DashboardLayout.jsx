@@ -39,11 +39,21 @@
 
 // export default DashboardLayout;
 
-import { Outlet } from "react-router-dom";
+import { Outlet,useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Sidebar from "../components/common/Sidebar";
 
 const DashboardLayout = () => {
+  const navigate = useNavigate();
+
+useEffect(() => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    navigate("/login", { replace: true });
+  }
+}, [navigate]);
+
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [isOpen, setIsOpen] = useState(false);
 

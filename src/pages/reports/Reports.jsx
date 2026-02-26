@@ -80,7 +80,7 @@ const years = Array.from({ length: 5 }, (_, i) =>
     selectedDate.getMonth() + 1
   );
 
-}, []);
+}, [selectedDate]);
 
 const fetchReports = async (date = selectedDate) => {
   const year = date.getFullYear();
@@ -287,11 +287,19 @@ const exportToCSV = () => {
             {(searchTerm ? filteredInvoices : invoices).map((inv, index)  => (
               <tr key={index} style={styles.tr}>
                 <td style={styles.td}>{new Date(inv.date).toLocaleDateString()}</td>
-                <td style={{...styles.td, fontWeight: 'bold'}}>{inv.customer?.name || 'N/A'}</td>
+                <td style={{...styles.td, fontWeight: 'bold'}}>
+              {inv.customer
+              ? inv.customer.isActive === false
+              ? <span style={{ color: "red" }}>
+             {inv.customer.name} (Inactive)
+            </span>
+              : inv.customer.name
+              : "N/A"}
+            </td>
                 <td style={styles.td}>{inv.invoiceNo}</td>
                 <td style={styles.td}>₹ {(inv.paid || 0).toLocaleString()}</td>
                 <td style={styles.td}>₹ {(inv.balance || 0).toLocaleString()}</td>
-                <td style={styles.td}>₹ {inv.reference}</td>
+                <td style={styles.td}> {inv.reference}</td>
                 <td style={styles.td}>
                   <button style={styles.actionBtn} onClick={() => handleView(inv)}>👁️</button>
                   <button style={styles.actionBtn} onClick ={() => handlePrint(inv)}>📥</button>
