@@ -14,7 +14,7 @@ const AuthLayout = () => {
 const styles = {
   container: {
     width: "100vw",
-    height: "100vh",
+    minHeight: "100vh",
 
     display: "flex",
     alignItems: "center",
@@ -35,7 +35,7 @@ const styles = {
   card: {
     width: "100%",
     maxWidth: "420px",
-    padding: "28px",
+    padding: "20px",
 
     backgroundColor: "rgba(255, 255, 255, 0.58)",
     backdropFilter: "blur(3px)",

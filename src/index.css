@@ -11,12 +11,14 @@ body,
 #root {
   width: 100%;
   height: 100%;
+  overflow: hidden;
 }
 
 /* ===== BASE BODY STYLE ===== */
 body {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   background-color: #ffffff;
+  overflow-x: hidden;
 }
 
 /* ===== REMOVE VITE DEMO STYLES ===== */

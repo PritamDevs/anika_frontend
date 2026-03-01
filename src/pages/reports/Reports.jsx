@@ -119,7 +119,7 @@ const fetchMonthlyChart = async (year, month) => {
       ...item,
       label: `${monthName} ${item.day}`,
     }));
-    console.log("Chart API Response:", res.data);
+    
     setChartData(mapped);
   } catch (err) {
     console.error("Chart Fetch Error:", err);

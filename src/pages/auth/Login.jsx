@@ -1,290 +1,3 @@
-// import { useState } from "react";
-// import { useNavigate } from "react-router-dom";
-// import logo from "../../assets/logo.png";
-
-// const Login = () => {
-//   const navigate = useNavigate();
-
-//   const [formData, setFormData] = useState({
-//     username: "",
-//     password: "",
-//     remember: false,
-//   });
-
-//  const [isModalOpen, setIsModalOpen] = useState(false);
-//   const [otpSent, setOtpSent] = useState(false);
-//   const [email, setEmail] = useState("");
-
-//   const handleChange = (e) => {
-//     const { name, value, type, checked } = e.target;
-//     setFormData({
-//       ...formData,
-//       [name]: type === "checkbox" ? checked : value,
-//     });
-//   };
-//   const handleSubmit = (e) => {
-//     e.preventDefault();
-
-//     // TEMPORARY AUTH LOGIC
-//     if (formData.username && formData.password) {
-//       navigate("/dashboard");
-//     } else {
-//       alert("Please enter username and password");
-//     }
-//   };
-
-//     const handleSendOTP = () => {
-//     if (email) {
-//       setOtpSent(true); // Shows the OTP section
-//     } else {
-//       alert("Please enter your email");
-//     }
-//   };
-
-//   return (
-//     <div style={styles.container}>
-//       <img src={logo} alt="logo" style={styles.logo} />
-//       <h2 style={styles.heading}>Anika Enterprises</h2>
-//       <p style={styles.subheading}>Ice Cream Wholesaler</p>
-
-//       <form onSubmit={handleSubmit} style={styles.form}>
-//         <div style={styles.field}>
-//           <label style={styles.label}>Username</label>
-//           <input
-//             type="text"
-//             name="username"
-//             value={formData.username}
-//             placeholder="username"
-//             onChange={handleChange}
-//             style={styles.input}
-//           />
-//         </div>
-
-//         <div style={styles.field}>
-//           <label style={styles.label}>Password</label>
-//           <input
-//             type="password"
-//             name="password"
-//             value={formData.password}
-//             placeholder="password"
-//             onChange={handleChange}
-//             style={styles.input}
-//           />
-//         </div>
-
-//         <div style={styles.row}>
-//           <label style={styles.checkboxLabel}>
-//             <input
-//               type="checkbox"
-//               name="remember"
-//               checked={formData.remember}
-//               onChange={handleChange}
-//             />
-//             Remember me
-//           </label>
-
-//         </div>
-
-//         <button type="submit" style={styles.button}>
-//           Login
-//         </button>
-//         {/* Added onClick to your existing span */}
-//         <span style={styles.forgot} onClick={() => setIsModalOpen(true)}>
-//           Forgot Password?
-//         </span>
-//       </form>
-
-//       {/* --- FORGOT PASSWORD MODAL --- */}
-//       {isModalOpen && (
-//         <div style={modalStyles.overlay}>
-//           <div style={modalStyles.modalBox}>
-//             <button style={modalStyles.closeBtn} onClick={() => {setIsModalOpen(false); setOtpSent(false);}}>✕</button>
-            
-//             <img src={logo} alt="logo" style={modalStyles.modalLogo} />
-//             <h2 style={modalStyles.modalHeading}>Anika Enterprises</h2>
-//             <p style={modalStyles.modalSubheading}>Ice Cream Wholesaler</p>
-//             <p style={modalStyles.forgotTitle}>Forgot Password</p>
-
-//             <div style={modalStyles.inputContainer}>
-//               <div style={modalStyles.emailRow}>
-//                 <input 
-//                   type="email" 
-//                   placeholder="Enter your Email" 
-//                   style={modalStyles.modalInput} 
-//                   onChange={(e) => setEmail(e.target.value)}
-//                 />
-//                 <button style={modalStyles.sendOtpBtn} onClick={handleSendOTP}>
-//                   Send OTP
-//                 </button>
-//               </div>
-
-//               {otpSent && (
-//                 <div style={modalStyles.otpSection}>
-//                   <input type="text" placeholder="OTP" style={modalStyles.modalInput} />
-//                   <button style={modalStyles.submitBtn} onClick={() => setIsModalOpen(false)}>
-//                     Submit
-//                   </button>
-//                 </div>
-//               )}
-//             </div>
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// const styles = {
-  // container: {
-  //   display: "flex",
-  //   flexDirection: "column",
-  //   alignItems: "center",
-  //   justifyContent: "center",
-  //   gap: "24px",
-  // },
-  // logo: {
-  //   width: "100px",
-  //   height: "100px",
-  //   marginBottom: "2px",
-  // },
-  // heading: {
-  //   textAlign: "center",
-  //   marginBottom: "4px",
-  //   color: "#01292f",
-  //   fontSize: "35px",
-  //   fontWeight: "750",
-
-  // },
-  // subheading: {
-  //   textAlign: "center",
-  //   fontSize: "20px",
-  //   color: "#000000ff",
-  //   marginBottom: "24px",
-  // },
-  // form: {
-  //   display: "flex",
-  //   flexDirection: "column",
-  //   gap: "16px",
-  // },
-  // field: {
-  //   display: "flex",
-  //   flexDirection: "column",
-  //   gap: "6px",
-    
-  // },
-  // label: {
-  //   fontSize: "14px",
-  //   fontWeight: "500",
-  // },
-  // input: {
-  //   padding: "10px",
-  //   borderRadius: "15px",
-  //   border: "2.5px linear-gradient(5deg, #86a2b8 0%, #00e5faff 100%)",
-  //   fontSize: "20px",
-  //   backgroundColor: "rgba(255, 255, 255, 0.34)",
-  // },
-  // row: {
-  //   display: "flex",
-  //   justifyContent: "space-between",
-  //   alignItems: "center",
-  //   fontSize: "13px",
-  // },
-  // checkboxLabel: {
-  //   display: "flex",
-  //   gap: "6px",
-  //   alignItems: "center",
-  // },
-  // forgot: {
-  //   textAlign: "center",
-  //   color: "#214b4f",
-  //   cursor: "pointer",
-  //   fontSize: "17px",
-  //   fontWeight: "650",
-  // },
-  // button: {
-  //   padding: "10px",
-  //   borderRadius: "6px",
-  //   border: "none",
-  //   backgroundColor: "#1d4ed8",
-  //   color: "#ffffff",
-  //   fontSize: "15px",
-  //   fontWeight: "600",
-  //   cursor: "pointer",
-  // },
-  
-// };
-// const modalStyles = {
-  // overlay: {
-  //   position: "fixed",
-  //   top: 0,
-  //   left: 0,
-  //   width: "100%",
-  //   height: "100%",
-  //   backgroundColor: "rgba(0,0,0,0.4)",
-  //   display: "flex",
-  //   justifyContent: "center",
-  //   alignItems: "center",
-  //   zIndex: 1000
-  // },
-  // modalBox: {
-  //   backgroundColor: "rgba(216, 235, 238, 0.95)",
-  //   width: "400px",
-  //   padding: "30px",
-  //   borderRadius: "20px",
-  //   textAlign: "center",
-  //   position: "relative",
-  //   boxShadow: "0 10px 25px rgba(0,0,0,0.1)"
-  // },
-  // closeBtn: {
-  //   position: "absolute",
-  //   top: "10px",
-  //   right: "15px",
-  //   background: "none",
-  //   border: "none",
-  //   fontSize: "20px",
-  //   cursor: "pointer"
-  // },
-  // modalLogo: { width: "60px", height: "60px", marginBottom: "5px" },
-  // modalHeading: { margin: 0, fontSize: "24px", color: "#01292f" },
-  // modalSubheading: { margin: "0 0 15px 0", fontSize: "14px" },
-  // forgotTitle: { fontWeight: "700", fontSize: "18px", marginBottom: "20px" },
-  // inputContainer: { display: "flex", flexDirection: "column", gap: "15px" },
-  // emailRow: { display: "flex", gap: "10px" },
-  // modalInput: {
-  //   flex: 1,
-  //   padding: "10px",
-  //   borderRadius: "8px",
-  //   border: "1px solid #99c1c4",
-  //   backgroundColor: "#fff"
-  // },
-  // sendOtpBtn: {
-  //   padding: "10px 15px",
-  //   borderRadius: "8px",
-  //   border: "none",
-  //   backgroundColor: "#48a7a8",
-  //   color: "#fff",
-  //   cursor: "pointer",
-  //   fontWeight: "600"
-  // },
-  // otpSection: {
-  //   display: "flex",
-  //   flexDirection: "column",
-  //   gap: "15px",
-  //   marginTop: "5px"
-  // },
-  // submitBtn: {
-  //   padding: "10px",
-  //   borderRadius: "8px",
-  //   border: "none",
-  //   backgroundColor: "#48a7a8",
-  //   color: "#fff",
-  //   cursor: "pointer",
-  //   fontSize: "16px",
-  //   fontWeight: "600"
-  // }
-// };
-
-// export default Login;
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
@@ -307,23 +20,11 @@ const Login = () => {
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [resetToken, setResetToken] = useState("");
+  const [showForgotBox, setShowForgotBox] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  /* ================= LOGIN ================= */
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-
-  //   const res = await fetch("http://localhost:5000/api/auth/login", {
-  //     method: "POST",
-  //     headers: { "Content-Type": "application/json" },
-  //     body: JSON.stringify(formData)
-  //   });
-
-  //   const data = await res.json();
-  //   if (!res.ok) return alert(data.message);
-
-  //   localStorage.setItem("token", data.token);
-  //   navigate("/dashboard");
-  // };
 
   const handleSubmit = async (e) => {
   e.preventDefault();
@@ -351,8 +52,8 @@ const Login = () => {
       alert(data.message);
       return;
     }
-
     localStorage.setItem("token", data.token);
+    navigate("/dashboard");
     // localStorage.setItem("role", data.role);
 
     navigate("/dashboard");
@@ -388,11 +89,13 @@ const Login = () => {
       body: JSON.stringify({ email, otp })
     });
 
+    
     const data = await res.json();
     if (!res.ok) return alert(data.message);
-
+    setResetToken(data.resetToken);
     setShowResetPassword(true);
   };
+  
 
   /* ================= RESET PASSWORD ================= */
   const handleResetPassword = async () => {
@@ -403,7 +106,7 @@ const Login = () => {
     const res = await fetch(`${BACKEND_URL}/api/auth/reset-password`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, otp, newPassword })
+      body: JSON.stringify({ token: resetToken, newPassword })
     });
 
     const data = await res.json();
@@ -450,88 +153,74 @@ const Login = () => {
         <button type="submit" style={styles.button}>
           Login
         </button>
+      <p
+      style={styles.forgot}
+      onClick={async () =>setShowForgotBox(true)}
+>
+  Forgot Password?
+</p>
+        
+        {/* <p
+        style={{ cursor: "pointer", color: "blue" }}
+        onClick={() => navigate("/register")}
+        >
+         Create Account
+        </p> */}
+       
 
-        {/* <span style={styles.forgot} onClick={() => setIsModalOpen(true)}>
-          Forgot Password?
-        </span> */}
+       
       </form>
+      {showForgotBox && (
+  <div style={forgotStyles.overlay}>
+    <div style={forgotStyles.box}>
+      
+      <button
+        style={forgotStyles.close}
+        onClick={() => setShowForgotBox(false)}
+      >
+        ✕
+      </button>
 
-      {/* ===== FORGOT PASSWORD MODAL ===== */}
-      {isModalOpen && (
-        <div style={modalStyles.overlay}>
-          <div style={modalStyles.modalBox}>
-            <button
-              style={modalStyles.closeBtn}
-              onClick={() => {
-                setIsModalOpen(false);
-                setOtpSent(false);
-                setShowResetPassword(false);
-              }}
-            >
-              ✕
-            </button>
+      <img src={logo} alt="logo" style={forgotStyles.logo} />
+      <h3 style={forgotStyles.title}>Reset Password</h3>
+      <p style={forgotStyles.subtitle}>
+        Enter your registered email
+      </p>
 
-            <img src={logo} alt="logo" style={modalStyles.modalLogo} />
-            <p style={modalStyles.forgotTitle}>Forgot Password</p>
+      <input
+        type="email"
+        placeholder="Email address"
+        value={resetEmail}
+        onChange={(e) => setResetEmail(e.target.value)}
+        style={forgotStyles.input}
+      />
 
-            <div style={modalStyles.inputContainer}>
-              <div style={modalStyles.emailRow}>
-                <input
-                  type="email"
-                  placeholder="Enter your Email"
-                  style={modalStyles.modalInput}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-                <button
-                  style={modalStyles.sendOtpBtn}
-                  onClick={handleSendOTP}
-                >
-                  Send OTP
-                </button>
-              </div>
+      <button
+        style={forgotStyles.button}
+        onClick={async () => {
+          if (!resetEmail) return alert("Enter email");
 
-              {otpSent && !showResetPassword && (
-                <div style={modalStyles.otpSection}>
-                  <input
-                    placeholder="OTP"
-                    style={modalStyles.modalInput}
-                    onChange={(e) => setOtp(e.target.value)}
-                  />
-                  <button
-                    style={modalStyles.submitBtn}
-                    onClick={handleVerifyOtp}
-                  >
-                    Submit
-                  </button>
-                </div>
-              )}
+          setLoading(true);
 
-              {showResetPassword && (
-                <div style={modalStyles.otpSection}>
-                  <input
-                    type="password"
-                    placeholder="New Password"
-                    style={modalStyles.modalInput}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                  />
-                  <input
-                    type="password"
-                    placeholder="Confirm Password"
-                    style={modalStyles.modalInput}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                  />
-                  <button
-                    style={modalStyles.submitBtn}
-                    onClick={handleResetPassword}
-                  >
-                    Change Password
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+          const res = await fetch(`${BACKEND_URL}/api/auth/forgot-password`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: resetEmail }),
+          });
+
+          const data = await res.json();
+          alert(data.message);
+
+          setLoading(false);
+          setShowForgotBox(false);
+        }}
+      >
+        {loading ? "Sending..." : "Send Reset Link"}
+      </button>
+
+    </div>
+  </div>
+)}
     </div>
   );
 };
@@ -613,76 +302,86 @@ const styles = { container: {
     fontWeight: "600",
     cursor: "pointer",
   },
-  
-};
-const modalStyles = {  overlay: {
+  };
+  const forgotStyles = {
+  overlay: {
     position: "fixed",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    backgroundColor: "rgba(0,0,0,0.4)",
+    inset: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
+    padding: "16px",
     zIndex: 1000
   },
-  modalBox: {
-    backgroundColor: "rgba(216, 235, 238, 0.95)",
-    width: "400px",
-    padding: "30px",
+
+  box: {
+    width: "100%",
+    maxWidth: "420px",
+    maxHeight: "90vh",
+    overflowY: "auto",
     borderRadius: "20px",
+    backgroundColor: "rgba(255,255,255,0.95)",
+    backdropFilter: "blur(10px)",
+    padding: "30px 24px",
     textAlign: "center",
     position: "relative",
-    boxShadow: "0 10px 25px rgba(0,0,0,0.1)"
+    boxShadow: "0 20px 40px rgba(0,0,0,0.25)"
   },
-  closeBtn: {
+
+  close: {
     position: "absolute",
-    top: "10px",
-    right: "15px",
-    background: "none",
+    top: "12px",
+    right: "16px",
     border: "none",
+    background: "none",
     fontSize: "20px",
     cursor: "pointer"
   },
-  modalLogo: { width: "60px", height: "60px", marginBottom: "5px" },
-  modalHeading: { margin: 0, fontSize: "24px", color: "#01292f" },
-  modalSubheading: { margin: "0 0 15px 0", fontSize: "14px" },
-  forgotTitle: { fontWeight: "700", fontSize: "18px", marginBottom: "20px" },
-  inputContainer: { display: "flex", flexDirection: "column", gap: "15px" },
-  emailRow: { display: "flex", gap: "10px" },
-  modalInput: {
-    flex: 1,
-    padding: "10px",
-    borderRadius: "8px",
-    border: "1px solid #99c1c4",
-    backgroundColor: "#fff"
+
+  logo: {
+    width: "60px",
+    marginBottom: "10px"
   },
-  sendOtpBtn: {
-    padding: "10px 15px",
-    borderRadius: "8px",
+
+  title: {
+    fontSize: "20px",
+    fontWeight: "700",
+    color: "#01292f",
+    marginBottom: "6px"
+  },
+
+  subtitle: {
+    fontSize: "14px",
+    marginBottom: "20px",
+    color: "#555"
+  },
+
+  input: {
+    width: "100%",
+    padding: "14px",
+    borderRadius: "12px",
+    border: "1px solid #ccc",
+    marginBottom: "16px",
+    fontSize: "16px",  // better for mobile
+    outline: "none"
+  },
+
+  button: {
+    width: "100%",
+    padding: "14px",
+    borderRadius: "12px",
     border: "none",
-    backgroundColor: "#48a7a8",
+    backgroundColor: "#1d4ed8",
     color: "#fff",
-    cursor: "pointer",
-    fontWeight: "600"
-  },
-  otpSection: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "15px",
-    marginTop: "5px"
-  },
-  submitBtn: {
-    padding: "10px",
-    borderRadius: "8px",
-    border: "none",
-    backgroundColor: "#48a7a8",
-    color: "#fff",
-    cursor: "pointer",
-    fontSize: "16px",
-    fontWeight: "600"
-  }};
+    fontWeight: "600",
+    fontSize: "15px",
+    cursor: "pointer"
+  }
+
+  
+};
+
 
 export default Login;
 

@@ -263,11 +263,7 @@ const Customers = () => {
 /* ---- Design System Styles ---- */
 
 const styles = {
-  // container: {
-  //   padding: "30px",
-  //   backgroundColor: "#ffffff",
-  //   minHeight: "100vh"
-  // },
+ 
   container: {
   padding: "30px",
   backgroundColor: "#ffffff",
@@ -275,12 +271,7 @@ const styles = {
   width: "100%",
   overflowX: "hidden"
 },
-  // header: {
-  //   display: "flex",
-  //   justifyContent: "space-between",
-  //   alignItems: "center",
-  //   marginBottom: "25px"
-  // },
+ 
   header: {
   display: "flex",
   justifyContent: "space-between",
@@ -289,11 +280,7 @@ const styles = {
   gap: "15px",
   marginBottom: "25px"
 },
-  // headerRight: {
-  //   display: "flex",
-  //   gap: "15px",
-  //   alignItems: "center"
-  // },
+  
   headerRight: {
   display: "flex",
   gap: "15px",

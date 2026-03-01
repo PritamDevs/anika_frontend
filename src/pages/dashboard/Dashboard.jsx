@@ -38,14 +38,21 @@ const [topCustomers, setTopCustomers] = useState([]);
 
  useEffect(() => {
   fetchDashboardData();
-  fetchMonthlySales(selectedYear);
-fetchTopCustomers();
-
+  fetchTopCustomers();
 }, []);
-const fetchMonthlySales = async () => {
+
+useEffect(() => {
+  fetchMonthlySales(selectedYear);
+}, [selectedYear]);
+const fetchMonthlySales = async (year) => {
   try {
-    const res = await fetch(`${BACKEND_URL}/api/dashboard/monthly-sales`);
+    const res = await fetch(`${BACKEND_URL}/api/dashboard/monthly-sales?year=${year}`);
     const data = await res.json();
+if (!data || data.length === 0) {
+      setMonthlySales([]);
+      return;
+    }
+
     setMonthlySales(data);
   } catch (err) {
     console.error("Monthly Sales Error:", err);
@@ -86,6 +93,7 @@ const fetchDashboardData = async () => {
 const formatCurrency = (value) =>
   `₹ ${Number(value).toLocaleString("en-IN")}`;
 
+const hasSalesData = monthlySales.some(item => item.total > 0);
 
 
   return (
@@ -138,7 +146,7 @@ const formatCurrency = (value) =>
       ))}
     </select>
   </div>
-  <ResponsiveContainer width="100%" height="100%">
+  {hasSalesData ? (  <ResponsiveContainer width="100%" height="100%">
     <LineChart data={monthlySales}>
       <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
       <XAxis dataKey="month" stroke="#fff" />
@@ -162,7 +170,17 @@ const formatCurrency = (value) =>
   animationEasing="ease-in-out"
       />
     </LineChart>
-  </ResponsiveContainer>
+  </ResponsiveContainer>) : (<div style={{
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "100%",
+    fontWeight: "bold",
+    opacity: 0.6
+  }}>
+    No Sales Data Available
+  </div>)}
+
 </ChartBox>
           <ChartBox title="Top 10 Customers" height="300px">
   <ResponsiveContainer width="100%" height="100%">

@@ -104,21 +104,6 @@ const CreateInvoice = () => {
     setItems(updated);
   };
 
-  // const handleProductChange = (index, productId) => {
-  //   const product = mockProducts.find((p) => p.id === Number(productId));
-  //   if (product) {
-  //     const updated = [...items];
-  //     updated[index] = {
-  //       ...updated[index],
-  //       productId: product.id,
-  //       productName: product.name, // Important for Invoice Preview
-  //       batchNo: product.batchNo,
-  //       rate: product.rate,
-  //       total: product.rate * updated[index].qty
-  //     };
-  //     setItems(updated);
-  //   }
-  // };
 
   const removeItem = (index) => setItems(items.filter((_, i) => i !== index));
 
@@ -343,12 +328,7 @@ const styles = {
     paddingBottom: "10px", 
     marginBottom: "20px" 
   },
-  // customerGrid: { 
-  //   display: "grid", 
-  //   gridTemplateColumns: "1fr 1fr", 
-  //   gap: "15px", 
-  //   marginBottom: "20px" 
-  // },
+
   customerGrid: { 
   display: "grid", 
   gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
@@ -362,12 +342,7 @@ const styles = {
     outline: "none", 
     backgroundColor: "#fff" 
   },
-  // tableContainer: { 
-  //   backgroundColor: "#fff", 
-  //   borderRadius: "10px", 
-  //   padding: "10px", 
-  //   overflow: "hidden" 
-  // },
+ 
   tableContainer: { 
   backgroundColor: "#fff", 
   borderRadius: "10px", 
@@ -417,12 +392,7 @@ const styles = {
     backgroundColor: "#ffe5e5", 
     transform: "scale(1.05)" 
   },
-  // footerRow: { 
-  //   display: "flex", 
-  //   justifyContent: "space-between", 
-  //   marginTop: "20px", 
-  //   alignItems: "flex-start" 
-  // },
+
   footerRow: { 
   display: "flex", 
   justifyContent: "space-between", 
@@ -455,14 +425,7 @@ const styles = {
     justifyContent: "flex-end", 
     gap: "15px" 
   },
-  // summaryInput: { 
-  //   padding: "8px", 
-  //   borderRadius: "10px", 
-  //   border: "1px solid #94a3b8", 
-  //   textAlign: "right", 
-  //   width: "150px", 
-  //   backgroundColor: "#fff" 
-  // },
+  
   summaryInput: { 
   padding: "8px", 
   borderRadius: "10px", 

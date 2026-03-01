@@ -1,11 +1,14 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
+
 
 // Layouts
 import AuthLayout from "./layouts/AuthLayout";
 import DashboardLayout from "./layouts/DashboardLayout";
 
-// Pages (temporary placeholders, we’ll build them later)
+// Pages
+import Register from "./pages/auth/Register";
 import Login from "./pages/auth/Login";
+import ResetPassword from "./pages/auth/ResetPassword";
 import Dashboard from "./pages/dashboard/Dashboard";
 import Products from "./pages/products/Products";
 import Customers from "./pages/customers/Customers";
@@ -17,12 +20,13 @@ import Reports from "./pages/reports/Reports";
 
 function App() {
   return (
-    <Router>
-      <Routes>
+    <Routes>
 
         {/* Auth Routes */}
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />   {/* 🔥 MOVE HERE */}
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
         </Route>
 
         {/* Protected Dashboard Routes */}
@@ -38,9 +42,9 @@ function App() {
           <Route path="/reports" element={<Reports />} />
         </Route>
 
-      </Routes>
-    </Router>
+      
+    </Routes>
   );
-}
 
+}
 export default App;

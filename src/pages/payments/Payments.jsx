@@ -88,22 +88,30 @@ useEffect(() => {
   setPayments(filtered);
 };
 
+const [filteredInvoices, setFilteredInvoices] = useState([]);
 
 
 
 
   /* ---- Handlers ---- */
+const handleCustomerChange = (e) => {
+  const customerId = e.target.value;
+  const customer = customers.find((c) => c._id === customerId);
 
-  const handleCustomerChange = (e) => {
-    const customerId = e.target.value;
-    const customer = customers.find((c) => c._id === customerId);
+  // Filter invoices of selected customer
+  const customerInvoices = invoices.filter(
+    (inv) => inv.customerId?._id === customerId
+  );
 
-    setForm({
-      ...form,
-      customerId,
-      gstin: customer?.gstin || "",
-    });
-  };
+  setForm({
+    ...form,
+    customerId,
+    invoiceId: "",   // reset invoice when customer changes
+    gstin: customer?.gstin || "",
+  });
+
+  setFilteredInvoices(customerInvoices);
+};
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -138,7 +146,7 @@ useEffect(() => {
       }
     );
 
-    alert("Transaction Recorded Successfully");
+    // alert("Transaction Recorded Successfully");
 
     fetchPayments();
 
@@ -265,7 +273,7 @@ useEffect(() => {
               <label style={styles.label}>Invoice No.</label>
               <select name="invoiceId" style={styles.input} value={form.invoiceId} onChange={handleChange}>
                 <option value="">Select Invoice</option>
-                 {invoices.map((inv) => (
+                 {filteredInvoices.map((inv) => (
                   <option key={inv._id} value={inv._id}>
                     {inv.invoiceNumber}
                   </option>

@@ -10,7 +10,7 @@ const Sidebar = ({isMobile,isOpen,setIsOpen}) => {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const user = token ? jwtDecode(token) : null;
-  console.log("Decoded user from token:", user);
+  // console.log("Decoded user from token:", user);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   // const [email, setEmail] = useState(user?.email || "");
 
@@ -22,43 +22,7 @@ const handleLogout = () => {
   localStorage.removeItem("token");
   navigate("/login", { replace: true });
 };
-  // const handleUpdateProfile = async () => {
-  //   try {
-  //     await fetch("http://localhost:5000/api/users/update-email", {
-  //       method: "PUT",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //       body: JSON.stringify({ email }),
-  //     });
-
-  //     alert("Email updated successfully");
-  //   } catch {
-  //     alert("Failed to update email");
-  //   }
-  // };
-//   const handleSaveEmail = async () => {
-//   try {
-//     const res = await fetch("http://localhost:5000/api/admin/profile", {
-//       method: "PUT",
-//       headers: {
-//         "Content-Type": "application/json",
-//         Authorization: `Bearer ${token}`
-//       },
-//       body: JSON.stringify({ email })
-//     });
-
-//     const data = await res.json();
-
-//     // 🔥 Replace old token
-//     localStorage.setItem("token", data.token);
-
-//     alert("Email updated successfully");
-//   } catch {
-//     alert("Failed to update email");
-//   }
-// };
+  
 
 
   return (
@@ -160,23 +124,10 @@ const handleLogout = () => {
               </div>
               <p style={styles.modalRoleLabel}>Admin</p>
 
-              <div style={styles.inputGroup}>
-                {/* <label style={styles.inputLabel}>Username</label> */}
-                {/* <div style={styles.inputBox}>{user.username}</div> */}
-              </div>
+              
 
-              <div style={styles.inputGroup}>
-                {/* <label style={styles.inputLabel}>Email</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  style={styles.inputBox}
-                /> */}
-              </div>
-              {/* <button style={styles.saveBtn} onClick={handleSaveEmail}>
-                Save Changes
-              </button> */}
+             
+              
 
               <button style={styles.logoutBtn} onClick={handleLogout}>
                 Log Out
