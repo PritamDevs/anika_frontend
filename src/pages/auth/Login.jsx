@@ -153,13 +153,13 @@ const Login = () => {
         <button type="submit" style={styles.button}>
           Login
         </button>
-      <p
+      {/* <p
       style={styles.forgot}
       onClick={async () =>setShowForgotBox(true)}
 >
   Forgot Password?
 </p>
-        
+         */}
         {/* <p
         style={{ cursor: "pointer", color: "blue" }}
         onClick={() => navigate("/register")}
