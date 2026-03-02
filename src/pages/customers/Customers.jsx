@@ -11,8 +11,8 @@ const Customers = () => {
     name: "",
     contact: "",
     address: "",
-    totalPurchase: 0,
-    paid: 0
+    totalPurchase: "",
+    paid: ""
   });
 
   const token = localStorage.getItem("token");
@@ -37,7 +37,7 @@ const Customers = () => {
   /* ================= HANDLERS ================= */
   const openAddModal = () => {
     setEditCustomer(null);
-    setFormData({ name: "", contact: "", address: "", totalPurchase: 0, paid: 0 });
+    setFormData({ name: "", contact: "", address: "", totalPurchase: "", paid: ""});
     setIsModalOpen(true);
   };
 

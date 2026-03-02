@@ -8,6 +8,7 @@ import { BACKEND_URL } from "../../config/index.js";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
 
   const handleAddInvoice = () => {
     navigate("/invoice/create");
@@ -46,7 +47,14 @@ useEffect(() => {
 }, [selectedYear]);
 const fetchMonthlySales = async (year) => {
   try {
-    const res = await fetch(`${BACKEND_URL}/api/dashboard/monthly-sales?year=${year}`);
+    const res = await fetch(
+  `${BACKEND_URL}/api/dashboard/monthly-sales?year=${year}`,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  }
+);
     const data = await res.json();
 if (!data || data.length === 0) {
       setMonthlySales([]);
@@ -61,7 +69,14 @@ if (!data || data.length === 0) {
 
 const fetchTopCustomers = async () => {
   try {
-    const res = await fetch(`${BACKEND_URL}/api/dashboard/top-customers`);
+    const res = await fetch(
+  `${BACKEND_URL}/api/dashboard/top-customers`,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  }
+);
     const data = await res.json();
     setTopCustomers(data);
   } catch (err) {
@@ -73,17 +88,28 @@ const fetchTopCustomers = async () => {
 
 const fetchDashboardData = async () => {
   try {
-    const res = await fetch(`${BACKEND_URL}/api/dashboard`); 
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(`${BACKEND_URL}/api/dashboard`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    if (!res.ok) {
+      throw new Error("Unauthorized or failed request");
+    }
+
     const data = await res.json();
 
     setStats({
-      totalSales: data.totalSales,
-      outstanding: data.outstanding,
-      totalCustomers: data.totalCustomers,
-      openInvoices: data.openInvoices
+      totalSales: data.totalSales ?? 0,
+      outstanding: data.outstanding ?? 0,
+      totalCustomers: data.totalCustomers ?? 0,
+      openInvoices: data.openInvoices ?? 0
     });
 
-    setLowStockData(data.lowStockProducts);
+    setLowStockData(data.lowStockProducts ?? []);
 
   } catch (error) {
     console.error("Dashboard fetch error:", error);
@@ -93,8 +119,8 @@ const fetchDashboardData = async () => {
 const formatCurrency = (value) =>
   `₹ ${Number(value).toLocaleString("en-IN")}`;
 
-const hasSalesData = monthlySales.some(item => item.total > 0);
-
+const hasSalesData = Array.isArray(monthlySales) &&
+                     monthlySales.some(item => item.total > 0);
 
   return (
     <div style={styles.container}>
