@@ -83,6 +83,7 @@ const Products = () => {
           rate: data.rate,
           discount: data.discount,
           stockQty: data.stock,
+          lowStockAlert: data.lowStockAlert,
         }),
       });
     } 
@@ -99,6 +100,7 @@ const Products = () => {
           rate: data.rate,
           discount: data.discount,
           stockQty: data.stock,
+          lowStockAlert: data.lowStockAlert,
         }),
       });
     }

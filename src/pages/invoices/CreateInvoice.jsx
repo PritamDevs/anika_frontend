@@ -85,6 +85,7 @@ const CreateInvoice = () => {
     rate: Number(product.rate || 0),
     discount: Number(product.discount || 0),
     stockQty: Number(product.stockQty || 0), // ADD THIS
+    lowStockAlert: Number(product.lowStockAlert || 5),
     total: Number(product.rate || 0) * Number(updated[index].qty)
   };
     setItems(updated);
@@ -92,12 +93,11 @@ const CreateInvoice = () => {
 
   const updateItem = (i, field, value) => {
     const updated = [...items];
-    if (field === "qty") {
+ if (field === "qty") {
   const stock = updated[i].stockQty || 0;
 
-  if (Number(value) > stock) {
-    alert(`Only ${stock} items available in stock`);
-    return;
+  if (Number(value) < 0) {
+    value = 0;
   }
 
   if (stock <= 0) {
@@ -196,6 +196,7 @@ const CreateInvoice = () => {
     alert("Server error");
   }
 };
+
 const hasInvalidStock = items.some(
   item => item.qty > item.stockQty || item.stockQty <= 0
 );
@@ -294,18 +295,25 @@ const isDesktop = window.innerWidth >= 768;
         + New Customer
       </button>
     </div>
-        {items.some(item => item.stockQty <= 5 && item.stockQty > 0) && (
-          <div style={{
-            background: "#fff3cd",
-            padding: "10px",
-            borderRadius: "8px",
-            marginBottom: "10px",
-            color: "#856404",
-            fontWeight: "bold"
-            }}>
-              ⚠️ Some products are running low on stock
-          </div>
-          )}
+       {items.some(item => item.qty > item.stockQty || item.stockQty <= item.lowStockAlert) && (
+  <div style={{
+    background: "#fff3cd",
+    padding: "10px",
+    borderRadius: "8px",
+    marginBottom: "10px",
+    color: "#856404",
+    fontWeight: "bold"
+  }}>
+    ⚠️ Some products are running low on stock.  
+    {items.map(item => (
+      item.qty > item.stockQty && (
+        <div key={item.productId}>
+          Max available quantity reached: {item.stockQty}
+        </div>
+      )
+    ))}
+  </div>
+)}
 
           {items.some(item => item.stockQty <= 0) && (
             <div style={{
@@ -368,20 +376,17 @@ const isDesktop = window.innerWidth >= 768;
                     </select>
                   </td>
                   {/* ✅ ADD THIS STOCK COLUMN */}
-                  <td style={{
+                  <td
+                  style={{
                     ...styles.td,
-                    color:
-                    item.stockQty <= 0
-                    ? "red"
-                    : item.stockQty <= 5
-                    ? "orange"
-                    : "green"
-                    }}>
-                      {item.stockQty ?? "-"}
-                    </td>
+                    fontWeight: "bold",color:item.stockQty <= 0 ? "#dc2626": item.stockQty <= item.lowStockAlert ? "#f59e0b"      : "#16a34a"
+                  }}>
+                    {item.stockQty ?? "-"}
+                  </td>
                  {/* <td style={styles.td}>{item.batchNo}</td> */}
                   <td style={styles.td}>
-                    <input type="number" style={styles.tableInput} value={item.qty} onChange={(e) => updateItem(i, "qty", e.target.value)} />
+                   <input type="number" min="0" style={styles.tableInput} value={item.qty}onChange={(e) => updateItem(i, "qty",
+                    e.target.value)}/>
                   </td>
                   <td style={styles.td}>{item.rate}</td>
                   <td style={styles.td}>

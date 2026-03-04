@@ -13,6 +13,7 @@ const AddEditProduct = ({ isOpen, onClose, onSave, initialData }) => {
     rate: "",
     discount: "",
     stock: "",
+    lowStockAlert: "",
     date: getTodayDate(),
   });
 
@@ -22,9 +23,7 @@ const AddEditProduct = ({ isOpen, onClose, onSave, initialData }) => {
   useEffect(() => {
     if (initialData) {
       // EDIT MODE
-      setFormData({
-        ...initialData,
-        date: initialData.date || getTodayDate(),
+        setFormData({...initialData,lowStockAlert: initialData.lowStockAlert || "",date: initialData.date || getTodayDate(),
       });
     } else if (isOpen) {
       // ADD MODE → clear fields + set today's date
@@ -33,6 +32,7 @@ const AddEditProduct = ({ isOpen, onClose, onSave, initialData }) => {
         rate: "",
         discount: "",
         stock: "",
+        lowStockAlert: "",
         date: getTodayDate(),
       });
     }
@@ -80,8 +80,9 @@ const AddEditProduct = ({ isOpen, onClose, onSave, initialData }) => {
           <Input label="Rate" name="rate" value={formData.rate} onChange={handleChange} />
           <Input label="Discount %" name="discount" value={formData.discount} onChange={handleChange} />
           <Input label="Stock Qty" name="stock" value={formData.stock} onChange={handleChange} />
+          <Input label="Low Stock Alert" name="lowStockAlert" value={formData.lowStockAlert} onChange={handleChange} />
           <Input label="Date" name="date" type="date" value={formData.date} onChange={handleChange} />
-
+          
           <div style={styles.actions}>
             <HoverButton
               type="button"
