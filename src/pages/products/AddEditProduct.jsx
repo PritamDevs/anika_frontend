@@ -12,7 +12,8 @@ const AddEditProduct = ({ isOpen, onClose, onSave, initialData }) => {
     name: "",
     rate: "",
     discount: "",
-    stock: "",
+    stockQty: "",
+    addStock: "",
     lowStockAlert: "",
     date: getTodayDate(),
   });
@@ -20,53 +21,54 @@ const AddEditProduct = ({ isOpen, onClose, onSave, initialData }) => {
   /* =====================
      HANDLE ADD / EDIT MODE
   ===================== */
-  useEffect(() => {
-    if (initialData) {
-      // EDIT MODE
-        setFormData({...initialData,lowStockAlert: initialData.lowStockAlert || "",date: initialData.date || getTodayDate(),
-      });
-    } else if (isOpen) {
-      // ADD MODE → clear fields + set today's date
-      setFormData({
-        name: "",
-        rate: "",
-        discount: "",
-        stock: "",
-        lowStockAlert: "",
-        date: getTodayDate(),
-      });
-    }
-  }, [initialData, isOpen]);
-
+useEffect(() => {
+  if (initialData) {
+    setFormData({
+      name: initialData.name || "",
+      rate: initialData.rate || "",
+      discount: initialData.discount || "",
+      stockQty: initialData.stockQty || "",
+      addStock: "",
+      lowStockAlert: initialData.lowStockAlert || "",
+      date: initialData.date || getTodayDate()
+    });
+  } else if (isOpen) {
+    setFormData({
+      name: "",
+      rate: "",
+      discount: "",
+      stockQty: "",
+      addStock: "",
+      lowStockAlert: "",
+      date: getTodayDate(),
+    });
+  }
+}, [initialData, isOpen]);
   if (!isOpen) return null;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
+const handleSubmit = (e) => {
+  e.preventDefault();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  if (!formData.name || !formData.rate || formData.stockQty === "") {
+    alert("Product name, rate, and stock quantity are required");
+    return;
+  }
 
-    if (!formData.name || !formData.rate || !formData.stock) {
-      alert("Product name, rate, and stock quantity are required");
-      return;
-    }
+  onSave({
+    name: formData.name,
+    rate: Number(formData.rate),
+    discount: Number(formData.discount),
+    stockQty: Number(formData.stockQty),   // send current stock
+    addStock: Number(formData.addStock || 0), // send added stock
+    lowStockAlert: Number(formData.lowStockAlert)
+  });
 
-    onSave(formData);
-
-    // CLEAR FORM AFTER SAVE
-    setFormData({
-      name: "",
-      rate: "",
-      discount: "",
-      stock: "",
-      date: getTodayDate(),
-    });
-
-    onClose();
-  };
-
+  onClose();
+};
   return (
     <div style={styles.overlay}>
       <div style={styles.modal}>
@@ -79,7 +81,8 @@ const AddEditProduct = ({ isOpen, onClose, onSave, initialData }) => {
           {/* <Input label="Batch No." name="batchNo" value={formData.batchNo} onChange={handleChange} /> */}
           <Input label="Rate" name="rate" value={formData.rate} onChange={handleChange} />
           <Input label="Discount %" name="discount" value={formData.discount} onChange={handleChange} />
-          <Input label="Stock Qty" name="stock" value={formData.stock} onChange={handleChange} />
+          <Input label="Stock Qty" name="stockQty" value={formData.stockQty} onChange={handleChange} />
+          <Input label="Add Stock" name="addStock" type="number" value={formData.addStock} onChange={handleChange}/>
           <Input label="Low Stock Alert" name="lowStockAlert" value={formData.lowStockAlert} onChange={handleChange} />
           <Input label="Date" name="date" type="date" value={formData.date} onChange={handleChange} />
           

@@ -44,10 +44,7 @@ const Products = () => {
   };
 
   const handleEditClick = (product) => {
-    setEditProduct({
-      ...product,
-      stock: product.stockQty, 
-    });
+    setEditProduct(product);
     setIsModalOpen(true);
   };
 
@@ -68,9 +65,8 @@ const Products = () => {
     }
   };
 
- const handleSaveProduct = async (data) => {
+const handleSaveProduct = async (data) => {
   try {
-    // 🔁 EDIT MODE → UPDATE
     if (editProduct) {
       await fetch(`${BACKEND_URL}/api/products/${editProduct._id}`, {
         method: "PUT",
@@ -82,13 +78,12 @@ const Products = () => {
           name: data.name,
           rate: data.rate,
           discount: data.discount,
-          stockQty: data.stock,
+          stockQty: data.stockQty,
+          addStock: data.addStock,
           lowStockAlert: data.lowStockAlert,
         }),
       });
-    } 
-    // ➕ ADD MODE → CREATE
-    else {
+    } else {
       await fetch(`${BACKEND_URL}/api/products/add`, {
         method: "POST",
         headers: {
@@ -99,7 +94,7 @@ const Products = () => {
           name: data.name,
           rate: data.rate,
           discount: data.discount,
-          stockQty: data.stock,
+          stockQty: data.stockQty,
           lowStockAlert: data.lowStockAlert,
         }),
       });
@@ -168,6 +163,7 @@ const Products = () => {
                 <td style={styles.td}>{p.discount || 0}%</td>
                 <td style={styles.td}>{p.stockQty}</td>
                 <td style={styles.actionCell}>
+                  <div style={styles.actionWrapper}>
                   <button
                     style={styles.editBtn}
                     onClick={() => handleEditClick(p)}
@@ -180,6 +176,7 @@ const Products = () => {
                   >
                     🗑️
                   </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -295,17 +292,15 @@ const styles = {
   },
   td: {
     padding: "15px 12px",
-  borderBottom: "1px solid #94a3b8",
-  fontSize: "14px",
-  color: "#1e293b",
-  textAlign: "center",
-  verticalAlign: "middle",
+    borderBottom: "1px solid #94a3b8",
+    fontSize: "14px",
+    color: "#1e293b",
+    textAlign: "center",
+    verticalAlign: "middle",
+    whiteSpace: "nowrap"
   },
   actionCell: {
-    display: "flex",
-    justifyContent: "center",
-    gap: "10px",
-    alignItems: "center",
+    textAlign: "center",
     padding: "15px 12px",
     borderBottom: "1px solid #94a3b8",
   },
@@ -327,6 +322,11 @@ const styles = {
     textAlign: "center",
     padding: "40px",
     color: "#64748b",
+  },
+  actionWrapper: {
+    display: "flex",
+    justifyContent: "center",
+    gap: "10px",
   },
 };
 

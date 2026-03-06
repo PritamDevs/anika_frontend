@@ -74,9 +74,9 @@ const handleLogout = () => {
           <div style={styles.brandTextContent}>
             <div style={styles.titleWrapper}>
               <h2 style={styles.brandText}>Anika</h2>
-              <h2 style={styles.brandText}>Enterprises</h2>
+              <h2 style={styles.brandText}>Enterprise</h2>
             </div>
-            <span style={styles.subText}>Ice Cream Wholesaler</span>
+            <span style={styles.subText}>IceCream Distributor</span>
           </div>
         </div>
 

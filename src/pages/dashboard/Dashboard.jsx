@@ -240,8 +240,10 @@ const hasSalesData = Array.isArray(monthlySales) &&
             <div style={styles.alertHeader}>
               <h3 style={styles.alertTitle}>Low Stock Alerts</h3>
               <span style={styles.alertIcon}>⚠️</span>
-            </div>
-            <table style={styles.table}>
+        </div>
+
+  <div style={styles.tableContainer}>
+    <table style={styles.table}>
               <thead>
                 <tr style={styles.tableHeader}>
                   <th style={styles.th}>SL.</th>
@@ -263,6 +265,7 @@ const hasSalesData = Array.isArray(monthlySales) &&
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         </div>
       </div>
@@ -388,24 +391,25 @@ rightColumn: {
     border: "1px dashed rgba(255,255,255,0.2)",
     borderRadius: "10px",
   },
+  tableContainer: {
+    maxHeight: "330px",
+    overflowY: "auto"
+  },
 
   /* Table Specific Styles (Matching image_d17182.jpg) */
-  alertCard: {
-    minHeight: "400px",
-    height: "auto",
-    overflowX: "auto",
-    background: "linear-gradient(160deg, #6294a0, #7ca1b4)",
-    borderRadius: "15px",
-    padding: "20px",
-    color: "#000",
-    border: "1px solid #94a3b8"
-  },
+alertCard: {
+  background: "linear-gradient(160deg, #6294a0, #7ca1b4)",
+  borderRadius: "15px",
+  padding: "20px",
+  color: "#000",
+  border: "1px solid #94a3b8"
+},
   alertHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" },
   alertTitle: { margin: 0, fontSize: "18px", fontWeight: "bold" },
   alertIcon: { color: "#ef4444", fontSize: "24px" },
   table: { width: "100%", borderCollapse: "collapse" },
-  tableHeader: { borderBottom: "1px solid #333" },
-  th: { textAlign: "left", padding: "12px 8px", fontSize: "13px", fontWeight: "bold" },
+  tableHeader: {position: "sticky",top: 0,background: "#7ca1b4",zIndex: 1,borderBottom: "1px solid #333"},
+  th: {position: "sticky",top: 0,background: "#7ca1b4",   zIndex: 2,textAlign: "left",padding: "12px 8px",fontSize: "13px",fontWeight: "bold"},
   tr: { borderBottom: "1px solid rgba(0,0,0,0.1)" },
   td: { padding: "12px 8px", fontSize: "13px" },
 };

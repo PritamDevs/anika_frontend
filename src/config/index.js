@@ -1,5 +1,5 @@
 
-// // Local development backend
+// Local development backend
 // export const BACKEND_URL = "http://localhost:5000";
 
 // Production backend
