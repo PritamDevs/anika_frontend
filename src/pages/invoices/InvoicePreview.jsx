@@ -58,9 +58,9 @@ const InvoicePreview = () => {
         {/* The Invoice Paper */}
         <div className="printable-area" style={styles.invoiceCard}>
           <div style={styles.header}>
-            <h1 style={styles.brandName}>Anika Enterprises</h1>
+            <h1 style={styles.brandName}>Anika Enterprise</h1>
             <p style={styles.brandSub}>Cold Roll Ice Cream Authorized Distributor</p>
-            <p style={styles.brandSub}>Atisara (Saupara) Singur, Hooghly- 712223</p>
+            <p style={styles.brandSub}>Atisara (Show para) Singur, Hooghly- 712223</p>
             <p style={styles.brandSub}>Contact Number: 8017414827/ 8017372719</p>
             <h2 style={styles.title}>Invoice</h2>
           </div>
