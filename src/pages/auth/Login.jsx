@@ -27,42 +27,42 @@ const Login = () => {
 
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!formData.username || !formData.password) {
-    alert("Please enter username and password");
-    return;
-  }
-
-  try {
-    const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        username: formData.username.trim(),
-        password: formData.password
-      })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data.message);
+    if (!formData.username || !formData.password) {
+      alert("Please enter username and password");
       return;
     }
-    localStorage.setItem("token", data.token);
-    navigate("/dashboard");
-    // localStorage.setItem("role", data.role);
 
-    navigate("/dashboard");
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          username: formData.username.trim(),
+          password: formData.password
+        })
+      });
 
-  // eslint-disable-next-line no-unused-vars
-  } catch (err) {
-    alert("Server error");
-  }
-};
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message);
+        return;
+      }
+      localStorage.setItem("token", data.token);
+      navigate("/dashboard");
+      // localStorage.setItem("role", data.role);
+
+      navigate("/dashboard");
+
+      // eslint-disable-next-line no-unused-vars
+    } catch (err) {
+      alert("Server error");
+    }
+  };
 
   /* ================= SEND OTP ================= */
   const handleSendOTP = async () => {
@@ -89,13 +89,13 @@ const Login = () => {
       body: JSON.stringify({ email, otp })
     });
 
-    
+
     const data = await res.json();
     if (!res.ok) return alert(data.message);
     setResetToken(data.resetToken);
     setShowResetPassword(true);
   };
-  
+
 
   /* ================= RESET PASSWORD ================= */
   const handleResetPassword = async () => {
@@ -124,7 +124,7 @@ const Login = () => {
     <div style={styles.container}>
       <img src={logo} alt="logo" style={styles.logo} />
       <h2 style={styles.heading}>Anika Enterprise</h2>
-      <p style={styles.subheading}>Ice Cream Wholesaler</p>
+      <p style={styles.subheading}>Ice Cream Distributor</p>
 
       <form onSubmit={handleSubmit} style={styles.form}>
         <div style={styles.field}>
@@ -153,7 +153,7 @@ const Login = () => {
         <button type="submit" style={styles.button}>
           Login
         </button>
-      {/* <p
+        {/* <p
       style={styles.forgot}
       onClick={async () =>setShowForgotBox(true)}
 >
@@ -166,67 +166,68 @@ const Login = () => {
         >
          Create Account
         </p> */}
-       
 
-       
+
+
       </form>
       {showForgotBox && (
-  <div style={forgotStyles.overlay}>
-    <div style={forgotStyles.box}>
-      
-      <button
-        style={forgotStyles.close}
-        onClick={() => setShowForgotBox(false)}
-      >
-        ✕
-      </button>
+        <div style={forgotStyles.overlay}>
+          <div style={forgotStyles.box}>
 
-      <img src={logo} alt="logo" style={forgotStyles.logo} />
-      <h3 style={forgotStyles.title}>Reset Password</h3>
-      <p style={forgotStyles.subtitle}>
-        Enter your registered email
-      </p>
+            <button
+              style={forgotStyles.close}
+              onClick={() => setShowForgotBox(false)}
+            >
+              ✕
+            </button>
 
-      <input
-        type="email"
-        placeholder="Email address"
-        value={resetEmail}
-        onChange={(e) => setResetEmail(e.target.value)}
-        style={forgotStyles.input}
-      />
+            <img src={logo} alt="logo" style={forgotStyles.logo} />
+            <h3 style={forgotStyles.title}>Reset Password</h3>
+            <p style={forgotStyles.subtitle}>
+              Enter your registered email
+            </p>
 
-      <button
-        style={forgotStyles.button}
-        onClick={async () => {
-          if (!resetEmail) return alert("Enter email");
+            <input
+              type="email"
+              placeholder="Email address"
+              value={resetEmail}
+              onChange={(e) => setResetEmail(e.target.value)}
+              style={forgotStyles.input}
+            />
 
-          setLoading(true);
+            <button
+              style={forgotStyles.button}
+              onClick={async () => {
+                if (!resetEmail) return alert("Enter email");
 
-          const res = await fetch(`${BACKEND_URL}/api/auth/forgot-password`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: resetEmail }),
-          });
+                setLoading(true);
 
-          const data = await res.json();
-          alert(data.message);
+                const res = await fetch(`${BACKEND_URL}/api/auth/forgot-password`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ email: resetEmail }),
+                });
 
-          setLoading(false);
-          setShowForgotBox(false);
-        }}
-      >
-        {loading ? "Sending..." : "Send Reset Link"}
-      </button>
+                const data = await res.json();
+                alert(data.message);
 
-    </div>
-  </div>
-)}
+                setLoading(false);
+                setShowForgotBox(false);
+              }}
+            >
+              {loading ? "Sending..." : "Send Reset Link"}
+            </button>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 /* ===== YOUR STYLES (UNCHANGED) ===== */
-const styles = { container: {
+const styles = {
+  container: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -261,7 +262,7 @@ const styles = { container: {
     display: "flex",
     flexDirection: "column",
     gap: "6px",
-    
+
   },
   label: {
     fontSize: "14px",
@@ -302,8 +303,8 @@ const styles = { container: {
     fontWeight: "600",
     cursor: "pointer",
   },
-  };
-  const forgotStyles = {
+};
+const forgotStyles = {
   overlay: {
     position: "fixed",
     inset: 0,
@@ -379,7 +380,7 @@ const styles = { container: {
     cursor: "pointer"
   }
 
-  
+
 };
 
 
