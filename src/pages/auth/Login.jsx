@@ -123,7 +123,7 @@ const Login = () => {
   return (
     <div style={styles.container}>
       <img src={logo} alt="logo" style={styles.logo} />
-      <h2 style={styles.heading}>Anika Enterprises</h2>
+      <h2 style={styles.heading}>Anika Enterprise</h2>
       <p style={styles.subheading}>Ice Cream Wholesaler</p>
 
       <form onSubmit={handleSubmit} style={styles.form}>
