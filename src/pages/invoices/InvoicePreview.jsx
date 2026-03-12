@@ -20,39 +20,194 @@ const InvoicePreview = () => {
     );
   }
 
-  const handlePrint = () => {
-    window.print();
-  };
+ const handlePrint = () => {
 
-  useEffect(() => {
+  document.body.classList.remove("thermal-print");
+  document.body.classList.add("a4-print");
+
+  setTimeout(() => {
+    window.print();
+  }, 200);
+
+};
+
+const handleDirectPrint = () => {
+
+  document.body.classList.remove("a4-print");
+  document.body.classList.add("thermal-print");
+
+  setTimeout(() => {
+    window.print();
+  }, 200);
+
+};
+
+const handleDownload = () => {
+  window.print();
+};
+
+useEffect(() => {
+
   if (autoPrint) {
+
+    document.body.classList.remove("a4-print");
+    document.body.classList.add("thermal-print");
+
     setTimeout(() => {
       window.print();
-    }, 500);
+    }, 400);
+
   }
+
 }, [autoPrint]);
 
 
   return (
     <div style={styles.wrapper}>
       {/* CSS to hide sidebar/buttons during print */}
-      <style>
-        {`
-          @media print {
-            body * { visibility: hidden; }
-            .printable-area, .printable-area * { visibility: visible; }
-            .printable-area { 
-              position: absolute; 
-              left: 0; 
-              top: 0; 
-              width: 100%; 
-              border: none !important;
-              box-shadow: none !important;
-            }
-            .no-print { display: none !important; }
-          }
-        `}
-      </style>
+<style>
+{`
+/* Hide everything except invoice when printing */
+@media print {
+
+  body * {
+    visibility: hidden;
+  }
+
+  .printable-area,
+  .printable-area * {
+    visibility: visible;
+  }
+
+  .printable-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+}
+
+/* ---------- A4 MODE ---------- */
+
+body.a4-print .container {
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+body.a4-print .printable-area {
+  width: 100% !important;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+body.a4-print table {
+  page-break-inside: auto;
+}
+
+body.a4-print tr {
+  page-break-inside: avoid;
+}
+
+@media print {
+
+  body.a4-print {
+    width: 100%;
+  }
+
+  body.a4-print .printable-area {
+    padding: 20mm;
+  }
+
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+}
+
+/* ---------- THERMAL MODE ---------- */
+body.thermal-print {
+  font-family: monospace;
+  font-size: 12px;
+}
+
+body.thermal-print .printable-area {
+  width: 70mm;
+  margin: 0 auto;
+}
+
+/* Page setup for thermal printer */
+@media print {
+
+  @page {
+    size: 80mm auto;
+    margin: 0;
+  }
+
+  body.thermal-print {
+    width: 80mm;
+  }
+
+  body.thermal-print table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+  }
+
+  body.thermal-print th,
+  body.thermal-print td {
+    font-size: 11px;
+    padding: 2px 2px;
+    word-wrap: break-word;
+  }
+
+  /* Column widths (safer for 80mm receipt) */
+
+  body.thermal-print th:nth-child(1),
+  body.thermal-print td:nth-child(1) {
+    width: 8%;
+    text-align: center;
+  }
+
+  body.thermal-print th:nth-child(2),
+  body.thermal-print td:nth-child(2) {
+    width: 36%;
+  }
+
+  body.thermal-print th:nth-child(3),
+  body.thermal-print td:nth-child(3) {
+    width: 10%;
+    text-align: center;
+  }
+
+  body.thermal-print th:nth-child(4),
+  body.thermal-print td:nth-child(4) {
+    width: 12%;
+    text-align: center;
+  }
+
+  body.thermal-print th:nth-child(5),
+  body.thermal-print td:nth-child(5) {
+    width: 14%;
+    text-align: right;
+  }
+
+  body.thermal-print th:nth-child(6),
+  body.thermal-print td:nth-child(6) {
+    width: 18%;
+    text-align: right;
+    white-space: nowrap;
+  }
+  body.thermal-print td {
+  font-variant-numeric: tabular-nums;
+}
+}
+`}
+</style>
 
       <div style={styles.container}>
         {/* The Invoice Paper */}
@@ -129,12 +284,21 @@ const InvoicePreview = () => {
         </div>
 
         {/* Buttons (Hidden when printing) */}
-        <div className="no-print" style={styles.actions}>
-          <button style={styles.backBtn} onClick={() => navigate(-1)}>Back</button>
-          <button style={styles.printBtn} onClick={handlePrint}>Print as PDF</button>
-        </div>
+      <div className="no-print" style={styles.actions}>
+      <button style={styles.backBtn} onClick={() => navigate(-1)}>
+       Back
+      </button>
+
+      <button style={styles.printBtn} onClick={handlePrint}>
+       Save / Print A4
+      </button>
+
+      <button style={styles.printBtn} onClick={handleDirectPrint}>
+       Thermal Print
+      </button>
       </div>
     </div>
+  </div>
   );
 };
 
@@ -151,23 +315,23 @@ const styles = {
   container: { width: "100%", maxWidth: "500px" },
   invoiceCard: {
     background: "#fff",
-    padding: "40px",
+    padding: "10px",
     borderRadius: "10px",
     border: "1px solid #ccc",
     boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
   },
   header: { textAlign: "center", marginBottom: "20px" },
-  brandName: { margin: "0", fontSize: "26px", fontWeight: "bold" },
+  brandName: { margin: "0", fontSize: "18px", fontWeight: "bold" },
   brandSub: { margin: "2px 0", fontSize: "12px", color: "#333" },
-  title: { marginTop: "15px", fontSize: "20px", textDecoration: "underline", fontWeight: "bold" },
+  title: { marginTop: "15px", fontSize: "16px", textDecoration: "underline", fontWeight: "bold" },
   metaSection: { marginBottom: "20px", fontSize: "14px" },
   customerRow: { display: "flex", marginTop: "10px" },
   customerLabel: { width: "80px" },
   customerDetails: { flex: 1 },
   table: { width: "100%", borderCollapse: "collapse", marginBottom: "30px" },
   tableHeaderRow: { borderTop: "2px solid #000", borderBottom: "2px solid #000" },
-  th: { padding: "8px 4px", textAlign: "left", fontSize: "13px" },
-  td: { padding: "8px 4px", fontSize: "13px", borderBottom: "1px solid #eee" },
+  th: { padding: "4px 2px", textAlign: "left", fontSize: "13px" },
+  td: { padding: "4px 2px", fontSize: "13px", borderBottom: "1px solid #eee" },
   totalsSection: { display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px", marginBottom: "40px" },
   totalRow: { display: "flex", alignItems: "center", gap: "15px" },
   totalLabel: { fontSize: "14px", fontWeight: "bold" },
