@@ -1,8 +1,3 @@
-
-// Local development backend
-// export const BACKEND_URL = "http://localhost:5000";
-
-// Production backend
-export const BACKEND_URL = "https://slategray-stinkbug-571717.hostingersite.com";
+export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 console.log("Using backend URL:", BACKEND_URL);

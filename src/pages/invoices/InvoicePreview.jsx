@@ -130,17 +130,18 @@ body.a4-print tr {
 }
 
 /* ---------- THERMAL MODE ---------- */
+
 body.thermal-print {
   font-family: monospace;
   font-size: 12px;
 }
 
 body.thermal-print .printable-area {
-  width: 70mm;
+  width: 72mm;
   margin: 0 auto;
+  padding-right: 3mm;
 }
 
-/* Page setup for thermal printer */
 @media print {
 
   @page {
@@ -152,58 +153,54 @@ body.thermal-print .printable-area {
     width: 80mm;
   }
 
-  body.thermal-print table {
-    width: 100%;
-    table-layout: fixed;
-    border-collapse: collapse;
-  }
+}
 
-  body.thermal-print th,
-  body.thermal-print td {
-    font-size: 11px;
-    padding: 2px 2px;
-    word-wrap: break-word;
-  }
+/* Hide thermal layout normally */
 
-  /* Column widths (safer for 80mm receipt) */
+.thermal-items{
+  display:none;
+}
 
-  body.thermal-print th:nth-child(1),
-  body.thermal-print td:nth-child(1) {
-    width: 8%;
-    text-align: center;
-  }
+/* Show only thermal layout in thermal print */
 
-  body.thermal-print th:nth-child(2),
-  body.thermal-print td:nth-child(2) {
-    width: 36%;
-  }
+body.thermal-print .a4-table{
+  display:none;
+}
 
-  body.thermal-print th:nth-child(3),
-  body.thermal-print td:nth-child(3) {
-    width: 10%;
-    text-align: center;
-  }
+body.thermal-print .thermal-items{
+  display:block;
+  font-family: monospace;
+  font-size:12px;
+}
 
-  body.thermal-print th:nth-child(4),
-  body.thermal-print td:nth-child(4) {
-    width: 12%;
-    text-align: center;
-  }
+/* Product Name */
 
-  body.thermal-print th:nth-child(5),
-  body.thermal-print td:nth-child(5) {
-    width: 14%;
-    text-align: right;
-  }
+body.thermal-print .product{
+  font-weight:bold;
+  text-transform:uppercase;
+  margin-top:4px;
+}
 
-  body.thermal-print th:nth-child(6),
-  body.thermal-print td:nth-child(6) {
-    width: 18%;
-    text-align: right;
-    white-space: nowrap;
-  }
-  body.thermal-print td {
-  font-variant-numeric: tabular-nums;
+/* Qty + Rate + Discount line */
+
+body.thermal-print .line{
+  display:flex;
+  justify-content:space-between;
+}
+
+/* Total Line */
+
+body.thermal-print .thermal-total{
+  text-align:right;
+  font-weight:bold;
+  margin-top:2px;
+}
+
+/* Divider Line */
+
+body.thermal-print .divider{
+  border-top:1px dashed #000;
+  margin:4px 0;
 }
 }
 `}
@@ -234,30 +231,58 @@ body.thermal-print .printable-area {
             </div>
           </div>
 
-          <table style={styles.table}>
-            <thead>
-              <tr style={styles.tableHeaderRow}>
-                <th style={styles.th}>S.No</th>
-                <th style={styles.th}>Product</th>
-                <th style={styles.th}>Qty</th>
-                <th style={styles.th}>Disc %</th>
-                <th style={styles.th}>Rate</th>
-                <th style={styles.th}>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {invoice.items.map((item, index) => (
-                <tr key={index}>
-                  <td style={styles.td}>{index + 1}</td>
-                  <td style={styles.td}>{item.productName || "Product"}</td>
-                  <td style={styles.td}>{item.qty}</td>
-                  <td style={styles.td}>{item.discount}%</td>
-                  <td style={styles.td}>{item.rate}</td>
-                  <td style={styles.td}>{Number(item.total).toFixed(2)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+       {/* A4 TABLE */}
+<table className="a4-table" style={styles.table}>
+  <thead>
+    <tr style={styles.tableHeaderRow}>
+      <th style={styles.th}>S.No</th>
+      <th style={styles.th}>Product</th>
+      <th style={styles.th}>Qty</th>
+      <th style={styles.th}>Disc %</th>
+      <th style={styles.th}>Rate</th>
+      <th style={styles.th}>Total</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {invoice.items.map((item, index) => (
+      <tr key={index}>
+        <td style={styles.td}>{index + 1}</td>
+        <td style={styles.td}>{item.productName}</td>
+        <td style={styles.td}>{item.qty}</td>
+        <td style={styles.td}>{item.discount}%</td>
+        <td style={styles.td}>{item.rate}</td>
+        <td style={styles.td}>{Number(item.total).toFixed(2)}</td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
+{/* THERMAL RECEIPT FORMAT */}
+<div className="thermal-items">
+  {invoice.items.map((item, index) => (
+    <div key={index} className="thermal-item">
+
+      <div className="divider"></div>
+
+      <div className="product">
+        {item.productName?.toUpperCase()}
+      </div>
+
+      <div className="line">
+        <span>{item.qty} x {item.rate}</span>
+        <span>Disc {item.discount}%</span>
+      </div>
+
+      <div className="thermal-total">
+        Total: ₹{Number(item.total).toFixed(2)}
+      </div>
+
+    </div>
+  ))}
+
+  <div className="divider"></div>
+</div>
 
           <div style={styles.totalsSection}>
             <div style={styles.totalRow}>
