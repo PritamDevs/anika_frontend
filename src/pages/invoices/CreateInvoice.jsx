@@ -544,24 +544,37 @@ useEffect(() => {
           </HoverButton>
           
           <div style={styles.summaryBox}>
-            <div style={styles.summaryItem}>
-              <span>Grand Total</span>
-              <input style={styles.summaryInput} value={grandTotal.toFixed(2)} readOnly />
-            </div>
-            <div style={styles.summaryItem}>
-              <span>Paid</span>
-              <input 
-                style={styles.summaryInput} 
-                type="number" 
-                value={paidAmount} 
-                onChange={(e) => setPaidAmount(Number(e.target.value))} 
-              />
-            </div>
-            <div style={styles.summaryItem}>
-              <span>Balance Due</span>
-              <input style={styles.summaryInput} value={balanceDue.toFixed(2)} readOnly />
-            </div>
-          </div>
+
+  {/* ✅ Grand Total */}
+  <div style={styles.summaryItem}>
+    <span>Grand Total</span>
+    <input style={styles.summaryInput} value={grandTotal.toFixed(2)} readOnly />
+  </div>
+
+  {/* ✅ ADD THIS (Previous Due) */}
+  <div style={styles.summaryItem}>
+    <span>Previous Due</span>
+    <input style={styles.summaryInput} value={previousDue.toFixed(2)} readOnly />
+  </div>
+
+  {/* ✅ Paid */}
+  <div style={styles.summaryItem}>
+    <span>Paid</span>
+    <input
+      style={styles.summaryInput}
+      type="number"
+      value={paidAmount}
+      onChange={(e) => setPaidAmount(Number(e.target.value))}
+    />
+  </div>
+
+  {/* ✅ Total Balance */}
+  <div style={styles.summaryItem}>
+    <span>Total Balance Due</span>
+    <input style={styles.summaryInput} value={balanceDue.toFixed(2)} readOnly />
+  </div>
+
+</div>
         </div>
 
         <div style={{ textAlign: 'center', marginTop: '20px' }}>

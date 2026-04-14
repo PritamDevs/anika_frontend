@@ -20,6 +20,10 @@ const Sidebar = ({isMobile,isOpen,setIsOpen}) => {
   // Function to handle logout and redirection
 const handleLogout = () => {
   localStorage.removeItem("token");
+  window.history.pushState(null, "", "/login");
+    window.onpopstate = () => {
+      window.history.pushState(null, "", "/login");
+    };
   navigate("/login", { replace: true });
 };
   
@@ -164,7 +168,8 @@ const NavItem = ({ to, label, icon,isMobile, setIsOpen }) => {
 const styles = {
   sidebar: {
     width: "240px",
-    height: "100vh",
+    height: "100dvh",
+    overflow: "hidden",
     background: "linear-gradient(135deg, #258a90, #86a2b8, #b4ced2)",
     borderRight: "1px solid #e5e7eb",
     display: "flex",
@@ -177,7 +182,7 @@ const styles = {
   logo: { width: "45px", height: "auto", display: "block" },
   brandText: { margin: 0, fontSize: "20px", fontWeight: "700", color: "#ffffff" },
   subText: { fontSize: "12px", color: "#000000", fontWeight: "600" },
-  nav: { display: "flex", flexDirection: "column", gap: "6px" },
+  nav: { display: "flex", flexDirection: "column", gap: "6px", flex: 1,overflowY: "auto",WebkitOverflowScrolling: "touch" },
   link: { display: "flex", alignItems: "center", textDecoration: "none", padding: "10px 12px", borderRadius: "6px", fontSize: "15px", fontWeight: "500", transition: "0.2s" },
   
   profileSection: {

@@ -1,5 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
+// Guard
+import ProtectedRoute from "./components/common/Protectedroute";
 
 // Layouts
 import AuthLayout from "./layouts/AuthLayout";
@@ -22,18 +24,26 @@ function App() {
   return (
     <Routes>
 
-      <Route path="/" element={<Navigate to="/login" />} />
+      {/* Root → login (or dashboard if already logged in) */}
+      <Route
+        path="/"
+        element={
+          localStorage.getItem("token")
+            ? <Navigate to="/dashboard" replace />
+            : <Navigate to="/login" replace />
+        }
+      />
 
-        {/* Auth Routes */}
-        <Route element={<AuthLayout />}>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />   {/* 🔥 MOVE HERE */}
-          <Route path="/reset-password/:token" element={<ResetPassword />} />
-        </Route>
+      {/* ✅ Public Auth Routes */}
+      <Route element={<AuthLayout />}>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+      </Route>
 
-        {/* Protected Dashboard Routes */}
+      {/* 🔒 Protected Routes — ProtectedRoute checks token on every render */}
+      <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
-          <Route path="/" element={<Navigate to="/login" />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/products" element={<Products />} />
           <Route path="/customers" element={<Customers />} />
@@ -43,10 +53,13 @@ function App() {
           <Route path="/expenses" element={<Expenses />} />
           <Route path="/reports" element={<Reports />} />
         </Route>
+      </Route>
 
-      
+      {/* Catch-all → any unknown URL goes to login */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
+
     </Routes>
   );
-
 }
+
 export default App;

@@ -42,10 +42,12 @@
 import { Outlet,useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Sidebar from "../components/common/Sidebar";
+import useAutoLogout from "../hooks/useAutoLogout";
 
 const DashboardLayout = () => {
+  useAutoLogout();
   const navigate = useNavigate();
-
+  
 useEffect(() => {
   const token = localStorage.getItem("token");
 
