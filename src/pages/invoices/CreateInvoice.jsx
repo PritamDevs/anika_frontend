@@ -406,7 +406,7 @@ useEffect(() => {
   display: "grid",
   gap: "20px",
   marginBottom: "20px",
-  gridTemplateColumns: window.innerWidth >= 768 ? "1fr 1fr" : "1fr"
+  gridTemplateColumns: isDesktop ? "1fr 1fr" : "1fr"
 }}>
   <div style={{ position: "relative" }}>
     <input

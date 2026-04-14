@@ -42,11 +42,17 @@ const Customers = () => {
     }
   };
 
-  useEffect(() => {
-    fetchCustomers(1, searchTerm);
-    const handleCustomer = () => fetchCustomers(currentPage, searchTerm);
-    socket.on("customerUpdated", handleCustomer);
-    return () => socket.off("customerUpdated", handleCustomer);
+  const currentPageRef = useRef(currentPage);
+const searchTermRef  = useRef(searchTerm);
+
+useEffect(() => { currentPageRef.current = currentPage; }, [currentPage]);
+useEffect(() => { searchTermRef.current  = searchTerm;  }, [searchTerm]);
+
+useEffect(() => {
+  fetchCustomers(1, searchTerm);
+  const handleCustomer = () => fetchCustomers(currentPageRef.current, searchTermRef.current);
+  socket.on("customerUpdated", handleCustomer);
+  return () => socket.off("customerUpdated", handleCustomer);
   }, []);
 
   // Search with debounce
