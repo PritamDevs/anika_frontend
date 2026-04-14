@@ -303,15 +303,9 @@ body.thermal-print .divider{
             </div>
           </div> */}
 
-          <div style={styles.totalsSection}>
+         <div style={styles.totalsSection}>
 
-  <div style={styles.totalRow}>
-    <span style={styles.totalLabel}>Previous Due</span>
-    <span style={styles.totalValue}>
-      ₹ {Number(invoice.previousAmount || 0).toFixed(2)}
-    </span>
-  </div>
-
+  {/* ✅ Grand Total FIRST */}
   <div style={styles.totalRow}>
     <span style={styles.totalLabel}>Grand Total</span>
     <span style={styles.totalValue}>
@@ -319,6 +313,15 @@ body.thermal-print .divider{
     </span>
   </div>
 
+  {/* ✅ Previous Due */}
+  <div style={styles.totalRow}>
+    <span style={styles.totalLabel}>Previous Due</span>
+    <span style={styles.totalValue}>
+      ₹ {Number(invoice.previousAmount || 0).toFixed(2)}
+    </span>
+  </div>
+
+  {/* ✅ Paid */}
   <div style={styles.totalRow}>
     <span style={styles.totalLabel}>Paid</span>
     <span style={styles.totalValue}>
@@ -326,9 +329,14 @@ body.thermal-print .divider{
     </span>
   </div>
 
+  <hr style={{ width: "100%", margin: "5px 0" }} />
+
+  {/* ✅ Final Balance */}
   <div style={styles.totalRow}>
-    <span style={styles.totalLabel}>Balance Due</span>
-    <span style={styles.totalValue}>
+    <span style={{ ...styles.totalLabel, fontWeight: "bold" }}>
+      Total Balance Due
+    </span>
+    <span style={{ ...styles.totalValue, fontWeight: "bold" }}>
       ₹ {Number(invoice.balance || 0).toFixed(2)}
     </span>
   </div>
