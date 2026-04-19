@@ -1,15 +1,22 @@
 import { Navigate, Outlet } from "react-router-dom";
 
-// This component re-evaluates on every render (unlike inline localStorage check in App.jsx)
+const isTokenExpired = (token) => {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.exp * 1000 < Date.now();
+  } catch {
+    return true;
+  }
+};
+
 const ProtectedRoute = () => {
   const token = localStorage.getItem("token");
-
-  // No token → kick to login, replace so back button can't return to dashboard
-  if (!token) {
-    return <Navigate to="/login" replace />;
+  
+  if (!token || isTokenExpired(token)) {
+    localStorage.removeItem("token");
+    return <Navigate to="/" replace />; 
   }
 
-  // Token exists → render the child route (DashboardLayout + page)
   return <Outlet />;
 };
 

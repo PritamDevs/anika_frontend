@@ -13,7 +13,7 @@ const useAutoLogout = (timeout = 15 * 60 * 1000) => {
       timer = setTimeout(() => {
         localStorage.removeItem("token");
         alert("Session expired due to inactivity");
-        navigate("/login");
+        navigate("/");
       }, timeout);
     };
 

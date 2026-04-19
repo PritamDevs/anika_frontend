@@ -67,19 +67,38 @@ const fetchProducts = async () => {
 };
   /* ---- Handlers ---- */
 
-const handleCustomerChange = (id) => {
-  const customer = customers.find((c) => c._id === id);
-  if (!customer) return;
+const handleCustomerChange = async (id) => {
+  const token = localStorage.getItem("token");
 
-  setSelectedCustomer({
-    _id: customer._id,
-    name: customer.name,
-    contact: customer.contact,
-    address: customer.address,
-    dueAmount: customer.dueAmount || 0
-  });
-  setCustomerSearch(customer.name);  // ← was data.customer.name (wrong)
-  setPreviousDue(Number(customer.dueAmount || 0));
+  // Show name immediately from stale list
+  const local = customers.find(c => c._id === id);
+  if (local) setCustomerSearch(local.name);
+
+  try {
+    // Always fetch fresh list to get latest dueAmount
+    const res = await fetch(`${BACKEND_URL}/api/customers/all`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+    const fresh = data.customers.find(c => String(c._id) === String(id));
+    const source = fresh || local;
+    if (!source) return;
+
+    setSelectedCustomer({
+      _id: source._id,
+      name: source.name,
+      contact: source.contact,
+      address: source.address,
+    });
+    setPreviousDue(Number(source.dueAmount || 0));
+
+  } catch (err) {
+    console.error(err);
+    if (local) {
+      setSelectedCustomer({ _id: local._id, name: local.name, contact: local.contact, address: local.address });
+      setPreviousDue(Number(local.dueAmount || 0));
+    }
+  }
 };
 
   const addProduct = () => {
