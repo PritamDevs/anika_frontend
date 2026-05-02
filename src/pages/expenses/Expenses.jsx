@@ -21,15 +21,30 @@ const Expenses = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  const currentDate = new Date();
+  const years = Array.from({ length: 5 }, (_, i) => currentDate.getFullYear() - i);
+  const months = [
+    { value: 1, label: "January" }, { value: 2, label: "February" },
+    { value: 3, label: "March" }, { value: 4, label: "April" },
+    { value: 5, label: "May" }, { value: 6, label: "June" },
+    { value: 7, label: "July" }, { value: 8, label: "August" },
+    { value: 9, label: "September" }, { value: 10, label: "October" },
+    { value: 11, label: "November" }, { value: 12, label: "December" },
+  ];
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const selectedYear = selectedDate.getFullYear();
+  const selectedMonth = selectedDate.getMonth() + 1;
+
   useEffect(() => {
-  fetchExpenses();
-}, []);
+    fetchExpenses(selectedDate);
+  }, [selectedDate]);
 
-const fetchExpenses = async () => {
-  const res = await axios.get(`${BACKEND_URL}/api/expenses`);
-  setExpenses(res.data);
-};
-
+  const fetchExpenses = async (date = selectedDate) => {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const res = await axios.get(`${BACKEND_URL}/api/expenses?year=${year}&month=${month}`);
+    setExpenses(res.data);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -135,6 +150,33 @@ const paginatedExpenses = filteredExpenses.slice(
         <div style={styles.titleSection}>
           <h2 style={styles.heading}>Expenses Manager</h2>
           <p style={styles.subheading}>Track your all Expenses</p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <select
+            value={selectedMonth}
+            onChange={(e) => {
+              const newDate = new Date(selectedYear, e.target.value - 1, 1);
+              setSelectedDate(newDate);
+            }}
+            style={{ padding: "8px", borderRadius: "8px", border: "1px solid #ccc" }}
+          >
+            {months.map(m => (
+              <option key={m.value} value={m.value}>{m.label}</option>
+            ))}
+          </select>
+
+          <select
+            value={selectedYear}
+            onChange={(e) => {
+              const newDate = new Date(e.target.value, selectedMonth - 1, 1);
+              setSelectedDate(newDate);
+            }}
+            style={{ padding: "8px", borderRadius: "8px", border: "1px solid #ccc" }}
+          >
+            {years.map(y => (
+              <option key={y} value={y}>{y}</option>
+            ))}
+          </select>
         </div>
         <div style={styles.searchWrapper}>
           <input 
@@ -390,6 +432,10 @@ const styles = {
   tr: { borderBottom: '1px solid #94a3b8' },
   td: { padding: "12px", fontSize: "14px" },
   actionBtn: { background: '#40b5ad', border: 'none', borderRadius: '5px', padding: '5px 8px', marginRight: '5px', cursor: 'pointer' },
+  pagination: { display: "flex", alignItems: "center", justifyContent: "center", flexWrap: "wrap", gap: "8px", marginTop: "20px", paddingTop: "15px", borderTop: "1px solid #94a3b8" },
+  pageBtn: { padding: "8px 14px", border: "1px solid #94a3b8", borderRadius: "8px", cursor: "pointer", fontWeight: "bold", fontSize: "14px", background: "white", color: "#333", transition: "0.2s", minWidth: "38px" },
+  pageDots: { padding: "6px 4px", fontSize: "16px", color: "#555" },
+  pageInfo: { fontSize: "13px", color: "#444", marginLeft: "8px" },
 };
 // --- Pop-up Specific Styles (Based on image_c6fd18.jpg) ---
 const modalStyles = {
@@ -430,10 +476,6 @@ const modalStyles = {
   label: { fontSize: "12px", fontWeight: "bold", color: "#01292f" },
   modalInput: { padding: "10px", borderRadius: "8px", border: "1px solid #333", backgroundColor: "rgba(255,255,255,0.4)" },
   saveBtn: { backgroundColor: "#2d5a61", color: "#fff", padding: "12px", border: "none", borderRadius: "10px", fontWeight: "bold", cursor: "pointer", marginTop: "10px" },
-  pagination: { display: "flex", alignItems: "center", justifyContent: "center", flexWrap: "wrap", gap: "6px", marginTop: "20px", paddingTop: "15px", borderTop: "1px solid #94a3b8" },
-  pageBtn: { padding: "6px 12px", border: "1px solid #333", borderRadius: "6px", cursor: "pointer", fontWeight: "bold", fontSize: "14px", background: "white", color: "#333", transition: "0.2s" },
-  pageDots: { padding: "6px 4px", fontSize: "14px", color: "#555" },
-  pageInfo: { fontSize: "13px", color: "#444", marginLeft: "8px" },
 };
 
 
