@@ -1,8 +1,6 @@
 import { io } from "socket.io-client";
 import { BACKEND_URL } from "./config";
 
-const token = localStorage.getItem("token");
-
 const getUserIdFromToken = (token) => {
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
@@ -12,21 +10,32 @@ const getUserIdFromToken = (token) => {
   }
 };
 
+// ✅ Create socket but never auto connect
 export const socket = io(BACKEND_URL, {
   autoConnect: false,
-  auth: {
-    token,
-    userId: getUserIdFromToken(token)
-  }
+  reconnection: true,
+  reconnectionAttempts: 5,        // ✅ don't retry forever on old devices
+  reconnectionDelay: 2000,        // ✅ wait 2s between retries
+  timeout: 10000,                 // ✅ give up after 10s on slow networks
 });
 
-if (token) {
-  socket.connect();
-}
-
+// ✅ Only connect after login
 export const reconnectSocket = () => {
   const newToken = localStorage.getItem("token");
+  if (!newToken) return;          // ✅ don't connect if no token
+  
   const userId = getUserIdFromToken(newToken);
   socket.auth = { token: newToken, userId };
-  socket.disconnect().connect();
+  
+  if (socket.connected) {
+    socket.disconnect();
+  }
+  socket.connect();
+};
+
+// ✅ Clean disconnect on logout
+export const disconnectSocket = () => {
+  if (socket.connected) {
+    socket.disconnect();
+  }
 };

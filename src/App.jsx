@@ -8,20 +8,32 @@ import AuthLayout from "./layouts/AuthLayout";
 import DashboardLayout from "./layouts/DashboardLayout";
 
 // Pages
-import Register from "./pages/auth/Register";
-import Login from "./pages/auth/Login";
-import ResetPassword from "./pages/auth/ResetPassword";
-import Dashboard from "./pages/dashboard/Dashboard";
-import Products from "./pages/products/Products";
-import Customers from "./pages/customers/Customers";
-import CreateInvoice from "./pages/invoices/CreateInvoice";
-import InvoicePreview from "./pages/invoices/InvoicePreview";
-import Payments from "./pages/payments/Payments";
-import Expenses from "./pages/expenses/Expenses";
-import Reports from "./pages/reports/Reports";
+const Register = lazy(() => import("./pages/auth/Register"));
+const Login = lazy(() => import("./pages/auth/Login"));
+const ResetPassword = lazy(() => import("./pages/auth/ResetPassword"));
+const Dashboard = lazy(() => import("./pages/dashboard/Dashboard"));
+const Products = lazy(() => import("./pages/products/Products"));
+const Customers = lazy(() => import("./pages/customers/Customers"));
+const CreateInvoice = lazy(() => import("./pages/invoices/CreateInvoice"));
+const InvoicePreview = lazy(() => import("./pages/invoices/InvoicePreview"));
+const Payments = lazy(() => import("./pages/payments/Payments"));
+const Expenses = lazy(() => import("./pages/expenses/Expenses"));
+const Reports = lazy(() => import("./pages/reports/Reports"));
 
 function App() {
   return (
+        <Suspense fallback={
+      <div style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
+        fontSize: "16px",
+        color: "#01292f"
+      }}>
+        Loading...
+      </div>
+    }>
     <Routes>
 
       {/* Root → login (or dashboard if already logged in) */}
@@ -59,6 +71,7 @@ function App() {
       <Route path="*" element={<Navigate to="/login" replace />} />
 
     </Routes>
+  </Suspense>
   );
 }
 

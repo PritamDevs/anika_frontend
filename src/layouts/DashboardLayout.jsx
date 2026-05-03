@@ -43,10 +43,19 @@ import { Outlet,useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Sidebar from "../components/common/Sidebar";
 import useAutoLogout from "../hooks/useAutoLogout";
+import { disconnectSocket } from "../socket";
 
 const DashboardLayout = () => {
   useAutoLogout();
   const navigate = useNavigate();
+  
+    useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      disconnectSocket();
+      navigate("/login", { replace: true });
+    }
+  }, [navigate]);
   
 useEffect(() => {
   const token = localStorage.getItem("token");

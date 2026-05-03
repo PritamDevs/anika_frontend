@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-
+import { disconnectSocket } from "../../socket";
 import logo from "../../assets/logo.png";
 import adminLogo from "../../assets/logo.png"; 
 
@@ -19,6 +19,7 @@ const Sidebar = ({isMobile,isOpen,setIsOpen}) => {
 
   // Function to handle logout and redirection
 const handleLogout = () => {
+  disconnectSocket();        
   localStorage.removeItem("token");
   window.history.pushState(null, "", "/login");
     window.onpopstate = () => {
