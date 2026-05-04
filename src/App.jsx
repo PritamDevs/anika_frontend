@@ -6,6 +6,7 @@ import ProtectedRoute from "./components/common/Protectedroute";
 // Layouts
 import AuthLayout from "./layouts/AuthLayout";
 import DashboardLayout from "./layouts/DashboardLayout";
+import {lazy,Suspense} from "react";
 
 // Pages
 const Register = lazy(() => import("./pages/auth/Register"));
