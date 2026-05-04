@@ -2,10 +2,23 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useState, useEffect } from "react";
+import { useState, useEffect , useMemo } from "react";
 import {LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, BarChart, Bar } from "recharts";
 import { BACKEND_URL } from "../../config/index.js";
 import { socket } from "../../socket";
+
+const CustomTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div style={{ background: "#1e293b", padding: "10px", borderRadius: "10px", color: "#fff" }}>
+        <div>{data.name}</div>
+        <div>₹ {Number(data.total ?? data.totalPurchase ?? 0).toLocaleString("en-IN")}</div>
+      </div>
+    );
+  }
+  return null;
+};
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -132,36 +145,18 @@ const hasSalesData = Array.isArray(monthlySales) && monthlySales.some(item => it
   "Oct","Nov","Dec","Jan","Feb","Mar"
 ];
 
-const reorderedSales = financialMonths.map((m) => {
+const reorderedSales = useMemo(() => financialMonths.map((m) => {
   const found = monthlySales.find(item => item.month === m);
   return found || { month: m, total: 0 };
-});     
+}), [monthlySales]);
 
-const formattedTopCustomers = topCustomers.map(c => ({
+const formattedTopCustomers = useMemo(() => topCustomers.map(c => ({
   ...c,
   shortName: c.name.length > 8 
     ? c.name.slice(0, 8) + "..." 
     : c.name
-}));
+})), [topCustomers]);
 
-const CustomTooltip = ({ active, payload }) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-
-    return (
-      <div style={{
-        background: "#1e293b",
-        padding: "10px",
-        borderRadius: "10px",
-        color: "#fff"
-      }}>
-        <div>{data.name}</div> {/* ✅ FULL NAME */}
-       <div>₹ {Number(data.total ?? data.totalPurchase ?? 0).toLocaleString("en-IN")}</div>
-      </div>
-    );
-  }
-  return null;
-};
   return (
     <div style={styles.container}>
       {/* Page Header */}
@@ -172,7 +167,7 @@ const CustomTooltip = ({ active, payload }) => {
       Welcome back! Here's an overview of your Business
     </p>
   </div>
-  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+  <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
     <select
       value={selectedMonth}
       onChange={(e) => setSelectedMonth(Number(e.target.value))}
@@ -298,7 +293,7 @@ const CustomTooltip = ({ active, payload }) => {
               </thead>
               <tbody>
                 {lowStockData.map((item, index) => (
-                  <tr key={item.id} style={styles.tr}>
+                  <tr key={item._id} style={styles.tr}>
                     <td style={styles.td}>{index + 1}</td>
                     <td style={styles.td}>{item.name}</td>
                     <td style={styles.td}>{item.rate}</td>
@@ -309,7 +304,7 @@ const CustomTooltip = ({ active, payload }) => {
               </tbody>
             </table>
             </div>
-          </div>
+          </div>w
         </div>
       </div>
     </div>
@@ -350,7 +345,14 @@ const styles = {
   width: "100%",
   overflowX: "hidden",
 },
-  headerRow: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "25px" },
+  headerRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    flexWrap: "wrap",
+    gap: "10px",
+    marginBottom: "25px"
+  },
   heading: { margin: 0, fontSize: "32px", fontWeight: "700" },
   subheading: { margin: 0, color: "#64748b", fontSize: "14px" },
   addInvoiceBtn: {

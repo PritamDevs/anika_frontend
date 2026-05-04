@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import ErrorBoundary from "./components/common/ErrorBoundary";
 
 // Guard
 import ProtectedRoute from "./components/common/Protectedroute";
@@ -7,6 +8,7 @@ import ProtectedRoute from "./components/common/Protectedroute";
 import AuthLayout from "./layouts/AuthLayout";
 import DashboardLayout from "./layouts/DashboardLayout";
 import {lazy,Suspense} from "react";
+
 
 // Pages
 const Register = lazy(() => import("./pages/auth/Register"));
@@ -23,6 +25,7 @@ const Reports = lazy(() => import("./pages/reports/Reports"));
 
 function App() {
   return (
+     <ErrorBoundary>
         <Suspense fallback={
       <div style={{
         display: "flex",
@@ -72,7 +75,8 @@ function App() {
       <Route path="*" element={<Navigate to="/login" replace />} />
 
     </Routes>
-  </Suspense>
+   </Suspense>
+  </ErrorBoundary>
   );
 }
 
