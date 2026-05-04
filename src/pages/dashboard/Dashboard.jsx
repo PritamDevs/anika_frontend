@@ -31,26 +31,32 @@ const Dashboard = () => {
 
 const [selectedYear, setSelectedYear] = useState(currentYear);
 const [availableYears, setAvailableYears] = useState([currentYear]);
+const currentMonth = new Date().getMonth() + 1;
+const [selectedMonth, setSelectedMonth] = useState(currentMonth);
 
+const months = [
+  { value: 1, label: "January" }, { value: 2, label: "February" },
+  { value: 3, label: "March" }, { value: 4, label: "April" },
+  { value: 5, label: "May" }, { value: 6, label: "June" },
+  { value: 7, label: "July" }, { value: 8, label: "August" },
+  { value: 9, label: "September" }, { value: 10, label: "October" },
+  { value: 11, label: "November" }, { value: 12, label: "December" },
+];
 
 const [monthlySales, setMonthlySales] = useState([]);
 const [topCustomers, setTopCustomers] = useState([]);
 
 
 
- useEffect(() => {
-  fetchDashboardData();
+useEffect(() => {
+  fetchDashboardData(selectedYear, selectedMonth);
   fetchTopCustomers();
   const handleDashboard = () => {
-    fetchDashboard();
+    fetchDashboardData(selectedYear, selectedMonth);
   };
-
   socket.on("dashboardUpdated", handleDashboard);
-
-  return () => {
-    socket.off("dashboardUpdated", handleDashboard);
-  };
-}, []);
+  return () => socket.off("dashboardUpdated", handleDashboard);
+}, [selectedMonth, selectedYear]);
 
 useEffect(() => {
   fetchMonthlySales(selectedYear);
@@ -96,31 +102,21 @@ const fetchTopCustomers = async () => {
 
 
 
-const fetchDashboardData = async () => {
+const fetchDashboardData = async (year = selectedYear, month = selectedMonth) => {
   try {
     const token = localStorage.getItem("token");
-
-    const res = await fetch(`${BACKEND_URL}/api/dashboard`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+    const res = await fetch(`${BACKEND_URL}/api/dashboard?year=${year}&month=${month}`, {
+      headers: { Authorization: `Bearer ${token}` }
     });
-
-    if (!res.ok) {
-      throw new Error("Unauthorized or failed request");
-    }
-
+    if (!res.ok) throw new Error("Unauthorized or failed request");
     const data = await res.json();
-
     setStats({
       totalSales: data.totalSales ?? 0,
       outstanding: data.outstanding ?? 0,
       totalCustomers: data.totalCustomers ?? 0,
       openInvoices: data.openInvoices ?? 0
     });
-
     setLowStockData(data.lowStockProducts ?? []);
-
   } catch (error) {
     console.error("Dashboard fetch error:", error);
   }
@@ -170,16 +166,36 @@ const CustomTooltip = ({ active, payload }) => {
     <div style={styles.container}>
       {/* Page Header */}
       <div style={styles.headerRow}>
-        <div>
-          <h2 style={styles.heading}>Dashboard</h2>
-          <p style={styles.subheading}>
-            Welcome back! Here’s an overview of your Business
-          </p>
-        </div>
-        <button onClick={handleAddInvoice} style={styles.addInvoiceBtn}>
-          + Add Invoice
-        </button>
-      </div>
+  <div>
+    <h2 style={styles.heading}>Dashboard</h2>
+    <p style={styles.subheading}>
+      Welcome back! Here's an overview of your Business
+    </p>
+  </div>
+  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+    <select
+      value={selectedMonth}
+      onChange={(e) => setSelectedMonth(Number(e.target.value))}
+      style={{ padding: "8px", borderRadius: "8px", border: "1px solid #ccc", fontWeight: "bold" }}
+    >
+      {months.map(m => (
+        <option key={m.value} value={m.value}>{m.label}</option>
+      ))}
+    </select>
+    <select
+      value={selectedYear}
+      onChange={(e) => setSelectedYear(Number(e.target.value))}
+      style={{ padding: "8px", borderRadius: "8px", border: "1px solid #ccc", fontWeight: "bold" }}
+    >
+      {[currentYear, currentYear - 1, currentYear - 2].map(y => (
+        <option key={y} value={y}>{y}</option>
+      ))}
+    </select>
+    <button onClick={handleAddInvoice} style={styles.addInvoiceBtn}>
+      + Add Invoice
+    </button>
+  </div>
+</div>
 
       {/* Summary Cards */}
       <div style={styles.cardGrid}>
@@ -209,11 +225,11 @@ const CustomTooltip = ({ active, payload }) => {
         fontWeight: "bold"
       }}
     >
-      {[currentYear, currentYear - 1, currentYear - 2].map((year) => (
-        <option key={year} value={year}>
-          {year}
-        </option>
-      ))}
+                {[currentYear, currentYear - 1, currentYear - 2].map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
     </select>
   </div>
   {hasSalesData ? (  <ResponsiveContainer width="100%" height="100%">

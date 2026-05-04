@@ -6,10 +6,20 @@ const useAutoLogout = (timeout = 15 * 60 * 1000) => {
   const timerRef = useRef(null);
 
   useEffect(() => {
+    const lastActive = localStorage.getItem("lastActive");
+    if (lastActive && Date.now() - Number(lastActive) > timeout) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("lastActive");
+      navigate("/");
+      return;
+    }
+
     const resetTimer = () => {
+      localStorage.setItem("lastActive", Date.now());
       clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => {
         localStorage.removeItem("token");
+        localStorage.removeItem("lastActive");
         alert("Session expired due to inactivity");
         navigate("/");
       }, timeout);
