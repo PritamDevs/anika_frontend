@@ -304,7 +304,7 @@ const formattedTopCustomers = useMemo(() => topCustomers.map(c => ({
               </tbody>
             </table>
             </div>
-          </div>w
+          </div>
         </div>
       </div>
     </div>
