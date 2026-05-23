@@ -12,7 +12,7 @@ const Expenses = () => {
     vendor: "",
     amount: "",
     paymentMode: "Cash",
-    date: new Date().toLocaleDateString("en-CA"),
+    date: new Date().toISOString().split("T")[0]
   });
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -42,7 +42,16 @@ const Expenses = () => {
   const fetchExpenses = async (date = selectedDate) => {
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
-    const res = await axios.get(`${BACKEND_URL}/api/expenses?year=${year}&month=${month}`);
+    const token = localStorage.getItem("token");
+
+    const res = await axios.get(
+      `${BACKEND_URL}/api/expenses?year=${year}&month=${month}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
     setExpenses(res.data);
   };
 
@@ -54,7 +63,17 @@ const Expenses = () => {
   const handleSubmit = async (e) => {
   e.preventDefault();
 
-  await axios.post(`${BACKEND_URL}/api/expenses`, form);
+    const token = localStorage.getItem("token");
+
+    await axios.post(
+      `${BACKEND_URL}/api/expenses`,
+      form,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
 
   fetchExpenses();
 
@@ -64,7 +83,7 @@ const Expenses = () => {
     vendor: "",
     amount: "",
     paymentMode: "Cash",
-    date:  new Date().toLocaleDateString("en-CA"),
+    date: new Date().toISOString().split("T")[0],
   });
 };
 
@@ -82,9 +101,16 @@ const Expenses = () => {
   e.preventDefault();
 
   try {
+    const token = localStorage.getItem("token");
+
     await axios.put(
       `${BACKEND_URL}/api/expenses/${editingExpense._id}`,
-      editingExpense
+      editingExpense,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
     );
 
     fetchExpenses(); // refresh data
@@ -97,7 +123,16 @@ const Expenses = () => {
 
   const handleDelete = async (id) => {
   try {
-    await axios.delete(`${BACKEND_URL}/api/expenses/${id}`);
+    const token = localStorage.getItem("token");
+
+    await axios.delete(
+      `${BACKEND_URL}/api/expenses/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
     fetchExpenses(); // refresh list from DB
   } catch (error) {
     console.error("Delete error:", error);
@@ -282,8 +317,22 @@ const paginatedExpenses = filteredExpenses.slice(
             </tr>
           </thead>
           <tbody>
-            {paginatedExpenses.map((e) => (
-              <tr key={e._id} style={styles.tr}>
+            {paginatedExpenses.length === 0 ? (
+              <tr>
+                <td
+                  colSpan="7"
+                  style={{
+                    textAlign: "center",
+                    padding: "20px",
+                    fontWeight: "bold"
+                  }}
+                >
+                  No expenses found
+                </td>
+              </tr>
+            ) : (
+              paginatedExpenses.map((e) => (
+                <tr key={e._id} style={styles.tr}>
                 <td style={styles.td}> {new Date(e.date).toLocaleDateString("en-GB")}</td>
                 <td style={{...styles.td, fontWeight: 'bold'}}>{e.category}</td>
                 <td style={styles.td}>{e.description}</td>
@@ -295,7 +344,7 @@ const paginatedExpenses = filteredExpenses.slice(
                   <button style={styles.deleteBtn} onClick={() => handleDelete(e._id)}>🗑</button>
                 </td>
               </tr>
-            ))}
+            )))}
           </tbody>
         </table>
         {totalPages > 1 && (
