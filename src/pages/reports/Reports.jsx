@@ -102,6 +102,13 @@ const handleView = (inv) => {
   });
 };
 
+const handleEdit = (inv) => {
+
+  navigate(
+    `/invoice/edit/${inv._id}`
+  );
+
+};
 
   const handlePrint = (inv) => {
   navigate("/Invoice/Preview", {
@@ -311,6 +318,20 @@ const exportToCSV = () => {
                 <td style={styles.td}> {inv.reference}</td>
                 <td style={styles.td}>
                   <button style={styles.actionBtn} onClick={() => handleView(inv)}>👁️</button>
+                  <button
+                    onClick={() => handleEdit(inv)}
+                    style={{
+                      marginLeft: "8px",
+                      padding: "6px 12px",
+                      background: "#f4a261",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "5px",
+                      cursor: "pointer"
+                    }}
+                  >
+                    Edit
+                  </button>
                   <button style={styles.actionBtn} onClick ={() => handlePrint(inv)}>📥</button>
                 </td>
               </tr>

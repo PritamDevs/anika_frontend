@@ -275,7 +275,30 @@ const handleCustomerChange = (e) => {
           <div style={styles.formGrid}>
             <div style={styles.inputGroup}>
               <label style={styles.label}>Customer Name</label>
-              <select name="customerId" style={styles.input} value={form.customerId} onChange={handleCustomerChange}>
+              <select name="customerId" value={form.customerId} onChange={handleCustomerChange}>
+                {
+                  form.customerId && (
+                    <div
+                      style={{
+                        marginBottom: "12px",
+                        padding: "10px",
+                        background: "#f4fdf4",
+                        border: "1px solid #b7e4c7",
+                        borderRadius: "6px",
+                        color: "#2d6a4f",
+                        fontWeight: "600"
+                      }}
+                    >
+                      Customer Advance: ₹ {
+                        Number(
+                          customers.find(
+                            c => c._id === form.customerId
+                          )?.advanceAmount || 0
+                        ).toFixed(2)
+                      }
+                    </div>
+                  )
+                }
                 <option value="">Select Customer</option>
                {customers.map((c) => (
                   <option key={c._id} value={c._id}>

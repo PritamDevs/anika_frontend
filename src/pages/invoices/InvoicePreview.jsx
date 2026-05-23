@@ -5,8 +5,8 @@ import { useEffect } from "react";
 const InvoicePreview = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const {invoiceData, autoPrint} = location.state || {};
-  
+  const { invoiceData, autoPrint } = location.state || {};
+
   // Retrieve the dynamic data passed from CreateInvoice
   const invoice = location.state?.invoiceData || null;
 
@@ -20,53 +20,53 @@ const InvoicePreview = () => {
     );
   }
 
- const handlePrint = () => {
+  const handlePrint = () => {
 
-  document.body.classList.remove("thermal-print");
-  document.body.classList.add("a4-print");
+    document.body.classList.remove("thermal-print");
+    document.body.classList.add("a4-print");
 
-  setTimeout(() => {
-    window.print();
-  }, 200);
+    setTimeout(() => {
+      window.print();
+    }, 200);
 
-};
+  };
 
-const handleDirectPrint = () => {
-
-  document.body.classList.remove("a4-print");
-  document.body.classList.add("thermal-print");
-
-  setTimeout(() => {
-    window.print();
-  }, 200);
-
-};
-
-const handleDownload = () => {
-  window.print();
-};
-
-useEffect(() => {
-
-  if (autoPrint) {
+  const handleDirectPrint = () => {
 
     document.body.classList.remove("a4-print");
     document.body.classList.add("thermal-print");
 
     setTimeout(() => {
       window.print();
-    }, 400);
+    }, 200);
 
-  }
+  };
 
-}, [autoPrint]);
+  const handleDownload = () => {
+    window.print();
+  };
+
+  useEffect(() => {
+
+    if (autoPrint) {
+
+      document.body.classList.remove("a4-print");
+      document.body.classList.add("thermal-print");
+
+      setTimeout(() => {
+        window.print();
+      }, 400);
+
+    }
+
+  }, [autoPrint]);
 
 
   return (
     <div style={styles.wrapper}>
       {/* CSS to hide sidebar/buttons during print */}
-<style>
-{`
+      <style>
+        {`
 /* Hide everything except invoice when printing */
 @media print {
 
@@ -204,7 +204,7 @@ body.thermal-print .divider{
 }
 }
 `}
-</style>
+      </style>
 
       <div style={styles.container}>
         {/* The Invoice Paper */}
@@ -228,65 +228,65 @@ body.thermal-print .divider{
                 <strong>{invoice.customerName || invoice.customer?.name || "Deleted Customer"}</strong><br />
                 {invoice.customer?.address && <>{invoice.customer.address}<br /></>}
                 {invoice.customer?.gstin && <>GSTIN: {invoice.customer.gstin}<br /></>}<br />
-                {(invoice.customerContact || invoice.customer?.contact )&& (
+                {(invoice.customerContact || invoice.customer?.contact) && (
                   <>{invoice.customerContact || invoice.customer.contact}</>
                 )}
               </div>
             </div>
           </div>
 
-       {/* A4 TABLE */}
-<table className="a4-table" style={styles.table}>
-  <thead>
-    <tr style={styles.tableHeaderRow}>
-      <th style={styles.th}>S.No</th>
-      <th style={styles.th}>Product</th>
-      <th style={styles.th}>Qty</th>
-      <th style={styles.th}>Disc %</th>
-      <th style={styles.th}>Rate</th>
-      <th style={styles.th}>Total</th>
-    </tr>
-  </thead>
+          {/* A4 TABLE */}
+          <table className="a4-table" style={styles.table}>
+            <thead>
+              <tr style={styles.tableHeaderRow}>
+                <th style={styles.th}>S.No</th>
+                <th style={styles.th}>Product</th>
+                <th style={styles.th}>Qty</th>
+                <th style={styles.th}>Disc %</th>
+                <th style={styles.th}>Rate</th>
+                <th style={styles.th}>Total</th>
+              </tr>
+            </thead>
 
-  <tbody>
-    {invoice.items.map((item, index) => (
-      <tr key={index}>
-        <td style={styles.td}>{index + 1}</td>
-        <td style={styles.td}>{item.productName}</td>
-        <td style={styles.td}>{item.qty}</td>
-        <td style={styles.td}>{item.discount}%</td>
-        <td style={styles.td}>{item.rate}</td>
-        <td style={styles.td}>{Number(item.total).toFixed(2)}</td>
-      </tr>
-    ))}
-  </tbody>
-</table>
+            <tbody>
+              {invoice.items.map((item, index) => (
+                <tr key={index}>
+                  <td style={styles.td}>{index + 1}</td>
+                  <td style={styles.td}>{item.productName}</td>
+                  <td style={styles.td}>{item.qty}</td>
+                  <td style={styles.td}>{item.discount}%</td>
+                  <td style={styles.td}>{item.rate}</td>
+                  <td style={styles.td}>{Number(item.total).toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
-{/* THERMAL RECEIPT FORMAT */}
-<div className="thermal-items">
-  {invoice.items.map((item, index) => (
-    <div key={index} className="thermal-item">
+          {/* THERMAL RECEIPT FORMAT */}
+          <div className="thermal-items">
+            {invoice.items.map((item, index) => (
+              <div key={index} className="thermal-item">
 
-      <div className="divider"></div>
+                <div className="divider"></div>
 
-      <div className="product">
-        {item.productName?.toUpperCase()}
-      </div>
+                <div className="product">
+                  {item.productName?.toUpperCase()}
+                </div>
 
-      <div className="line">
-        <span>{item.qty} x {item.rate}</span>
-        <span>Disc {item.discount}%</span>
-      </div>
+                <div className="line">
+                  <span>{item.qty} x {item.rate}</span>
+                  <span>Disc {item.discount}%</span>
+                </div>
 
-      <div className="thermal-total">
-        Total: ₹{Number(item.total).toFixed(2)}
-      </div>
+                <div className="thermal-total">
+                  Total: ₹{Number(item.total).toFixed(2)}
+                </div>
 
-    </div>
-  ))}
+              </div>
+            ))}
 
-  <div className="divider"></div>
-</div>
+            <div className="divider"></div>
+          </div>
 
           {/* <div style={styles.totalsSection}>
             <div style={styles.totalRow}>
@@ -303,45 +303,66 @@ body.thermal-print .divider{
             </div>
           </div> */}
 
-         <div style={styles.totalsSection}>
+          <div style={styles.totalsSection}>
 
-  {/* ✅ Grand Total FIRST */}
-  <div style={styles.totalRow}>
-    <span style={styles.totalLabel}>Grand Total</span>
-    <span style={styles.totalValue}>
-      ₹ {Number(invoice.grandTotal || 0).toFixed(2)}
-    </span>
-  </div>
+            {/* ✅ Grand Total FIRST */}
+            <div style={styles.totalRow}>
+              <span style={styles.totalLabel}>Grand Total</span>
+              <span style={styles.totalValue}>
+                ₹ {Number(invoice.grandTotal || 0).toFixed(2)}
+              </span>
+            </div>
 
-  {/* ✅ Previous Due */}
-  <div style={styles.totalRow}>
-    <span style={styles.totalLabel}>Previous Due</span>
-    <span style={styles.totalValue}>
-      ₹ {Number(invoice.previousAmount || 0).toFixed(2)}
-    </span>
-  </div>
+            {/* ✅ Previous Due */}
+            <div style={styles.totalRow}>
+              <span style={styles.totalLabel}>Previous Due</span>
+              <span style={styles.totalValue}>
+                ₹ {Number(invoice.previousAmount || 0).toFixed(2)}
+              </span>
+            </div>
 
-  {/* ✅ Paid */}
-  <div style={styles.totalRow}>
-    <span style={styles.totalLabel}>Paid</span>
-    <span style={styles.totalValue}>
-      ₹ {Number(invoice.paid || 0).toFixed(2)}
-    </span>
-  </div>
+            {/* ✅ Advance Used */}
+            <div style={styles.totalRow}>
+              <span style={styles.totalLabel}>Advance Used</span>
+              <span
+                style={{
+                  ...styles.totalValue,
+                  color: "green"
+                }}
+              >
+                ₹ {
+                  Number(
+                    invoice.advanceUsed || 0
+                  ).toFixed(2)
+                }
+              </span>
+            </div>
 
-  <hr style={{ width: "100%", margin: "5px 0" }} />
+            {/* ✅ Paid */}
+            <div style={styles.totalRow}>
+              <span style={styles.totalLabel}>Paid</span>
+              <span style={styles.totalValue}>
+                ₹ {Number(invoice.paid || 0).toFixed(2)}
+              </span>
+            </div>
 
-  {/* ✅ Final Balance */}
-  <div style={styles.totalRow}>
-    <span style={{ ...styles.totalLabel, fontWeight: "bold" }}>
-      Total Balance Due
-    </span>
-    <span style={{ ...styles.totalValue, fontWeight: "bold" }}>
-      ₹ {Number(invoice.balance || 0).toFixed(2)}
-    </span>
-  </div>
+            <hr style={{ width: "100%", margin: "5px 0" }} />
 
-</div>
+            {/* ✅ Final Balance */}
+            <div style={styles.totalRow}>
+              <span style={{ ...styles.totalLabel, fontWeight: "bold" }}>
+                Total Balance Due
+              </span>
+              <span style={{ ...styles.totalValue, fontWeight: "bold" }}>
+                ₹ {
+                  Number(
+                    invoice.totalDueAmount || 0
+                  ).toFixed(2)
+                }
+              </span>
+            </div>
+
+          </div>
 
           <div style={styles.footer}>
             <p>This is a Computer Generated Invoice</p>
@@ -353,21 +374,21 @@ body.thermal-print .divider{
         </div>
 
         {/* Buttons (Hidden when printing) */}
-      <div className="no-print" style={styles.actions}>
-      <button style={styles.backBtn} onClick={() => navigate(-1)}>
-       Back
-      </button>
+        <div className="no-print" style={styles.actions}>
+          <button style={styles.backBtn} onClick={() => navigate(-1)}>
+            Back
+          </button>
 
-      <button style={styles.printBtn} onClick={handlePrint}>
-       Save / Print A4
-      </button>
+          <button style={styles.printBtn} onClick={handlePrint}>
+            Save / Print A4
+          </button>
 
-      <button style={styles.printBtn} onClick={handleDirectPrint}>
-       Thermal Print
-      </button>
+          <button style={styles.printBtn} onClick={handleDirectPrint}>
+            Thermal Print
+          </button>
+        </div>
       </div>
     </div>
-  </div>
   );
 };
 

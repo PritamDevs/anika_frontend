@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useState, useEffect , useMemo } from "react";
-import {LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, BarChart, Bar } from "recharts";
+import { useState, useEffect, useMemo } from "react";
+import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, BarChart, Bar } from "recharts";
 import { BACKEND_URL } from "../../config/index.js";
 import { socket } from "../../socket";
 
@@ -31,6 +31,7 @@ const Dashboard = () => {
   const [stats, setStats] = useState({
     totalSales: 0,
     outstanding: 0,
+    totalOutstanding: 0,
     totalCustomers: 0,
     openInvoices: 0,
   });
@@ -39,165 +40,201 @@ const Dashboard = () => {
 
   const [lowStockData, setLowStockData] = useState([]);
   // Sample data for the Low Stock Alerts table
- 
+
   const currentYear = new Date().getFullYear();
 
-const [selectedYear, setSelectedYear] = useState(currentYear);
-const [availableYears, setAvailableYears] = useState([currentYear]);
-const currentMonth = new Date().getMonth() + 1;
-const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [availableYears, setAvailableYears] = useState([currentYear]);
+  const currentMonth = new Date().getMonth() + 1;
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
 
-const months = [
-  { value: 1, label: "January" }, { value: 2, label: "February" },
-  { value: 3, label: "March" }, { value: 4, label: "April" },
-  { value: 5, label: "May" }, { value: 6, label: "June" },
-  { value: 7, label: "July" }, { value: 8, label: "August" },
-  { value: 9, label: "September" }, { value: 10, label: "October" },
-  { value: 11, label: "November" }, { value: 12, label: "December" },
-];
+  const months = [
+    { value: 1, label: "January" }, { value: 2, label: "February" },
+    { value: 3, label: "March" }, { value: 4, label: "April" },
+    { value: 5, label: "May" }, { value: 6, label: "June" },
+    { value: 7, label: "July" }, { value: 8, label: "August" },
+    { value: 9, label: "September" }, { value: 10, label: "October" },
+    { value: 11, label: "November" }, { value: 12, label: "December" },
+  ];
 
-const [monthlySales, setMonthlySales] = useState([]);
-const [topCustomers, setTopCustomers] = useState([]);
+  const [monthlySales, setMonthlySales] = useState([]);
+  const [topCustomers, setTopCustomers] = useState([]);
 
 
 
-useEffect(() => {
-  fetchDashboardData(selectedYear, selectedMonth);
-  fetchTopCustomers();
-  const handleDashboard = () => {
+  useEffect(() => {
     fetchDashboardData(selectedYear, selectedMonth);
+    fetchTopCustomers();
+    const handleDashboard = () => {
+      fetchDashboardData(selectedYear, selectedMonth);
+    };
+    socket.on("dashboardUpdated", handleDashboard);
+    return () => socket.off("dashboardUpdated", handleDashboard);
+  }, [selectedMonth, selectedYear]);
+
+  useEffect(() => {
+    fetchMonthlySales(selectedYear);
+  }, [selectedYear]);
+  const fetchMonthlySales = async (year) => {
+    try {
+      const res = await fetch(
+        `${BACKEND_URL}/api/dashboard/monthly-sales?year=${year}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      const data = await res.json();
+      if (!data || data.length === 0) {
+        setMonthlySales([]);
+        return;
+      }
+
+      setMonthlySales(data);
+    } catch (err) {
+      console.error("Monthly Sales Error:", err);
+    }
   };
-  socket.on("dashboardUpdated", handleDashboard);
-  return () => socket.off("dashboardUpdated", handleDashboard);
-}, [selectedMonth, selectedYear]);
 
-useEffect(() => {
-  fetchMonthlySales(selectedYear);
-}, [selectedYear]);
-const fetchMonthlySales = async (year) => {
-  try {
-    const res = await fetch(
-  `${BACKEND_URL}/api/dashboard/monthly-sales?year=${year}`,
-  {
-    headers: {
-      Authorization: `Bearer ${token}`
+  const fetchTopCustomers = async () => {
+    try {
+      const res = await fetch(
+        `${BACKEND_URL}/api/dashboard/top-customers`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      const data = await res.json();
+      setTopCustomers(data);
+    } catch (err) {
+      console.error("Top Customers Error:", err);
     }
-  }
-);
-    const data = await res.json();
-if (!data || data.length === 0) {
-      setMonthlySales([]);
-      return;
+  };
+
+
+
+  const fetchDashboardData = async (year = selectedYear, month = selectedMonth) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${BACKEND_URL}/api/dashboard?year=${year}&month=${month}&t=${Date.now()}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error("Unauthorized or failed request");
+      const data = await res.json();
+      setStats({
+        totalSales: data.totalSales ?? 0,
+        outstanding: data.outstanding ?? 0,
+        totalOutstanding: data.totalOutstanding ?? 0,
+        totalCustomers: data.totalCustomers ?? 0,
+        openInvoices: data.openInvoices ?? 0
+      });
+      setLowStockData(data.lowStockProducts ?? []);
+    } catch (error) {
+      console.error("Dashboard fetch error:", error);
     }
+  };
 
-    setMonthlySales(data);
-  } catch (err) {
-    console.error("Monthly Sales Error:", err);
-  }
-};
+  const formatCurrency = (value) =>
+    `₹ ${Number(value).toLocaleString("en-IN")}`;
 
-const fetchTopCustomers = async () => {
-  try {
-    const res = await fetch(
-  `${BACKEND_URL}/api/dashboard/top-customers`,
-  {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  }
-);
-    const data = await res.json();
-    setTopCustomers(data);
-  } catch (err) {
-    console.error("Top Customers Error:", err);
-  }
-};
+  const hasSalesData = Array.isArray(monthlySales) && monthlySales.some(item => item.total > 0);
 
+  const financialMonths = [
+    "Apr", "May", "Jun", "Jul", "Aug", "Sep",
+    "Oct", "Nov", "Dec", "Jan", "Feb", "Mar"
+  ];
 
+  const reorderedSales = useMemo(() => financialMonths.map((m) => {
+    const found = monthlySales.find(item => item.month === m);
+    return found || { month: m, total: 0 };
+  }), [monthlySales]);
 
-const fetchDashboardData = async (year = selectedYear, month = selectedMonth) => {
-  try {
-    const token = localStorage.getItem("token");
-    const res = await fetch(`${BACKEND_URL}/api/dashboard?year=${year}&month=${month}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (!res.ok) throw new Error("Unauthorized or failed request");
-    const data = await res.json();
-    setStats({
-      totalSales: data.totalSales ?? 0,
-      outstanding: data.outstanding ?? 0,
-      totalCustomers: data.totalCustomers ?? 0,
-      openInvoices: data.openInvoices ?? 0
-    });
-    setLowStockData(data.lowStockProducts ?? []);
-  } catch (error) {
-    console.error("Dashboard fetch error:", error);
-  }
-};
-
-const formatCurrency = (value) =>
-  `₹ ${Number(value).toLocaleString("en-IN")}`;
-
-const hasSalesData = Array.isArray(monthlySales) && monthlySales.some(item => item.total > 0);
-
-   const financialMonths = [
-  "Apr","May","Jun","Jul","Aug","Sep",
-  "Oct","Nov","Dec","Jan","Feb","Mar"
-];
-
-const reorderedSales = useMemo(() => financialMonths.map((m) => {
-  const found = monthlySales.find(item => item.month === m);
-  return found || { month: m, total: 0 };
-}), [monthlySales]);
-
-const formattedTopCustomers = useMemo(() => topCustomers.map(c => ({
-  ...c,
-  shortName: c.name.length > 8 
-    ? c.name.slice(0, 8) + "..." 
-    : c.name
-})), [topCustomers]);
+  const formattedTopCustomers = useMemo(() => topCustomers.map(c => ({
+    ...c,
+    shortName: c.name.length > 8
+      ? c.name.slice(0, 8) + "..."
+      : c.name
+  })), [topCustomers]);
 
   return (
     <div style={styles.container}>
       {/* Page Header */}
       <div style={styles.headerRow}>
-  <div>
-    <h2 style={styles.heading}>Dashboard</h2>
-    <p style={styles.subheading}>
-      Welcome back! Here's an overview of your Business
-    </p>
-  </div>
-  <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-    <select
-      value={selectedMonth}
-      onChange={(e) => setSelectedMonth(Number(e.target.value))}
-      style={{ padding: "8px", borderRadius: "8px", border: "1px solid #ccc", fontWeight: "bold" }}
-    >
-      {months.map(m => (
-        <option key={m.value} value={m.value}>{m.label}</option>
-      ))}
-    </select>
-    <select
-      value={selectedYear}
-      onChange={(e) => setSelectedYear(Number(e.target.value))}
-      style={{ padding: "8px", borderRadius: "8px", border: "1px solid #ccc", fontWeight: "bold" }}
-    >
-      {[currentYear, currentYear - 1, currentYear - 2].map(y => (
-        <option key={y} value={y}>{y}</option>
-      ))}
-    </select>
-    <button onClick={handleAddInvoice} style={styles.addInvoiceBtn}>
-      + Add Invoice
-    </button>
-  </div>
-</div>
+        <div>
+          <h2 style={styles.heading}>Dashboard</h2>
+          <p style={styles.subheading}>
+            Welcome back! Here's an overview of your Business
+          </p>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+          <select
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(Number(e.target.value))}
+            style={{ padding: "8px", borderRadius: "8px", border: "1px solid #ccc", fontWeight: "bold" }}
+          >
+            {months.map(m => (
+              <option key={m.value} value={m.value}>{m.label}</option>
+            ))}
+          </select>
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(Number(e.target.value))}
+            style={{ padding: "8px", borderRadius: "8px", border: "1px solid #ccc", fontWeight: "bold" }}
+          >
+            {[currentYear, currentYear - 1, currentYear - 2].map(y => (
+              <option key={y} value={y}>{y}</option>
+            ))}
+          </select>
+          <button onClick={handleAddInvoice} style={styles.addInvoiceBtn}>
+            + Add Invoice
+          </button>
+        </div>
+      </div>
 
       {/* Summary Cards */}
       <div style={styles.cardGrid}>
-        <StatCard title="TOTAL SALES" subtitle="THIS MONTH" value={`₹ ${stats.totalSales.toLocaleString("en-IN")}`} icon="🪄" valueColor="#9ae6b4" />
-        <StatCard title="OUSTANDING" subtitle="THIS MONTH" value={`₹ ${stats.outstanding.toLocaleString("en-IN")}`}  icon="🕒" valueColor="#ef4444" />
-        <StatCard title="TOTAL CUSTOMER" subtitle="OVERALL" value={stats.totalCustomers}  icon="👥" valueColor="#9ae6b4" />
-        <StatCard title="OPEN INVOICE" subtitle="THIS MONTH PENDING" value={stats.openInvoices}  icon="📋" valueColor="#ef4444" />
+        <StatCard
+          title="TOTAL SALES"
+          subtitle="THIS MONTH"
+          value={`₹ ${stats.totalSales.toLocaleString("en-IN")}`}
+          icon="🪄"
+          valueColor="#9ae6b4"
+        />
+
+        <StatCard
+          title="PENDING DUE"
+          subtitle="THIS MONTH"
+          value={`₹ ${stats.outstanding.toLocaleString("en-IN")}`}
+          icon="🕒"
+          valueColor="#ef4444"
+        />
+
+        <StatCard
+          title="TOTAL CUSTOMER"
+          subtitle="OVERALL"
+          value={stats.totalCustomers}
+          icon="👥"
+          valueColor="#9ae6b4"
+        />
+
+        <StatCard
+          title="OPEN INVOICE"
+          subtitle="THIS MONTH"
+          value={stats.openInvoices}
+          icon="📋"
+          valueColor="#ef4444"
+        />
+
+        <StatCard
+          title="TOTAL OUTSTANDING"
+          subtitle="ALL MONTHS"
+          value={`₹ ${stats.totalOutstanding.toLocaleString("en-IN")}`}
+          icon="💰"
+          valueColor="#facc15"
+        />
       </div>
 
       {/* Main Content Layout */}
@@ -206,71 +243,71 @@ const formattedTopCustomers = useMemo(() => topCustomers.map(c => ({
         <div style={styles.leftColumn}>
           <ChartBox title="Monthly Sales Performance" height="300px">
             <div style={{ textAlign: "right", marginBottom: "10px" }}>
-    <select
-      value={selectedYear}
-      onChange={(e) => {
-        const year = e.target.value;
-        setSelectedYear(year);
-        fetchMonthlySales(year);
-      }}
-      style={{
-        padding: "5px 10px",
-        borderRadius: "8px",
-        border: "none",
-        fontWeight: "bold"
-      }}
-    >
+              <select
+                value={selectedYear}
+                onChange={(e) => {
+                  const year = e.target.value;
+                  setSelectedYear(year);
+                  fetchMonthlySales(year);
+                }}
+                style={{
+                  padding: "5px 10px",
+                  borderRadius: "8px",
+                  border: "none",
+                  fontWeight: "bold"
+                }}
+              >
                 {[currentYear, currentYear - 1, currentYear - 2].map((year) => (
                   <option key={year} value={year}>
                     {year}
                   </option>
                 ))}
-    </select>
-  </div>
-  {hasSalesData ? (  <ResponsiveContainer width="100%" height="100%">
-    <LineChart data={reorderedSales}>
-      <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
-      <XAxis dataKey="month" stroke="#fff" />
-      <YAxis stroke="#fff" />
-      <Tooltip content={<CustomTooltip />} />
+              </select>
+            </div>
+            {hasSalesData ? (<ResponsiveContainer width="100%" height="100%">
+              <LineChart data={reorderedSales}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
+                <XAxis dataKey="month" stroke="#fff" />
+                <YAxis stroke="#fff" />
+                <Tooltip content={<CustomTooltip />} />
 
-      <Line
-        type="monotone"
-  dataKey="total"
-  stroke="#ffffff"
-  strokeWidth={2}
-  animationDuration={1000}
-  animationEasing="ease-in-out"
-      />
-    </LineChart>
-  </ResponsiveContainer>) : (<div style={{
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    height: "100%",
-    fontWeight: "bold",
-    opacity: 0.6
-  }}>
-    No Sales Data Available
-  </div>)}
+                <Line
+                  type="monotone"
+                  dataKey="total"
+                  stroke="#ffffff"
+                  strokeWidth={2}
+                  animationDuration={1000}
+                  animationEasing="ease-in-out"
+                />
+              </LineChart>
+            </ResponsiveContainer>) : (<div style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%",
+              fontWeight: "bold",
+              opacity: 0.6
+            }}>
+              No Sales Data Available
+            </div>)}
 
-</ChartBox>
+          </ChartBox>
           <ChartBox title="Top 10 Customers" height="300px">
-  <ResponsiveContainer width="100%" height="100%">
-    <BarChart data={formattedTopCustomers} margin={{ bottom: 40 }}>
-      <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
-      <XAxis dataKey="shortName" stroke="#fff" interval={0} tick={{ fontSize: 12 }}/>
-      <YAxis stroke="#fff" />
-      <Tooltip content={<CustomTooltip />} />
-      <Bar dataKey="totalPurchase"
-      fill="#ffffff"
-      animationDuration={1000}
-      animationEasing="ease-in-out" />
-    </BarChart>
-    </ResponsiveContainer>
-   </ChartBox>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={formattedTopCustomers} margin={{ bottom: 40 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
+                <XAxis dataKey="shortName" stroke="#fff" interval={0} tick={{ fontSize: 12 }} />
+                <YAxis stroke="#fff" />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar dataKey="totalPurchase"
+                  fill="#ffffff"
+                  animationDuration={1000}
+                  animationEasing="ease-in-out" />
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartBox>
 
-</div>
+        </div>
 
         {/* Right Column: Low Stock Alerts Table */}
         <div style={styles.rightColumn}>
@@ -278,31 +315,31 @@ const formattedTopCustomers = useMemo(() => topCustomers.map(c => ({
             <div style={styles.alertHeader}>
               <h3 style={styles.alertTitle}>Low Stock Alerts</h3>
               <span style={styles.alertIcon}>⚠️</span>
-        </div>
+            </div>
 
-  <div style={styles.tableContainer}>
-    <table style={styles.table}>
-              <thead>
-                <tr style={styles.tableHeader}>
-                  <th style={styles.th}>SL.</th>
-                  <th style={styles.th}>Product</th>
-                  <th style={styles.th}>Rate</th>
-                  <th style={styles.th}>Discount%</th>
-                  <th style={styles.th}>Stock Qty</th>
-                </tr>
-              </thead>
-              <tbody>
-                {lowStockData.map((item, index) => (
-                  <tr key={item._id} style={styles.tr}>
-                    <td style={styles.td}>{index + 1}</td>
-                    <td style={styles.td}>{item.name}</td>
-                    <td style={styles.td}>{item.rate}</td>
-                    <td style={styles.td}>{item.discount}%</td>
-                    <td style={styles.td}>{item.stockQty}</td>
+            <div style={styles.tableContainer}>
+              <table style={styles.table}>
+                <thead>
+                  <tr style={styles.tableHeader}>
+                    <th style={styles.th}>SL.</th>
+                    <th style={styles.th}>Product</th>
+                    <th style={styles.th}>Rate</th>
+                    <th style={styles.th}>Discount%</th>
+                    <th style={styles.th}>Stock Qty</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {lowStockData.map((item, index) => (
+                    <tr key={item._id} style={styles.tr}>
+                      <td style={styles.td}>{index + 1}</td>
+                      <td style={styles.td}>{item.name}</td>
+                      <td style={styles.td}>{item.rate}</td>
+                      <td style={styles.td}>{item.discount}%</td>
+                      <td style={styles.td}>{item.stockQty}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -339,12 +376,12 @@ const ChartBox = ({ title, height, children }) => (
 const styles = {
   // container: { padding: "30px", backgroundColor: "#f0f2f5", minHeight: "100vh" },
   container: {
-  padding: "30px",
-  backgroundColor: "#f0f2f5",
-  minHeight: "100vh",
-  width: "100%",
-  overflowX: "hidden",
-},
+    padding: "30px",
+    backgroundColor: "#f0f2f5",
+    minHeight: "100vh",
+    width: "100%",
+    overflowX: "hidden",
+  },
   headerRow: {
     display: "flex",
     justifyContent: "space-between",
@@ -367,11 +404,11 @@ const styles = {
   },
   // cardGrid: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "15px", marginBottom: "30px" },
   cardGrid: {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-  gap: "15px",
-  marginBottom: "30px",
-},
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: "15px",
+    marginBottom: "30px",
+  },
   card: {
     background: "linear-gradient(to right, #608d9b, #86a2b8)",
     padding: "15px",
@@ -399,24 +436,24 @@ const styles = {
 
   // chartsLayout: { display: "flex", gap: "20px" },
   chartsLayout: {
-  display: "flex",
-  gap: "20px",
-  flexWrap: "wrap",
-},
+    display: "flex",
+    gap: "20px",
+    flexWrap: "wrap",
+  },
   // leftColumn: { flex: "1.2", display: "flex", flexDirection: "column", gap: "20px" },
   // rightColumn: { flex: "1" },
   leftColumn: {
-  flex: "1 1 500px",
-  minWidth: 0,
-  display: "flex",
-  flexDirection: "column",
-  gap: "20px",
-},
+    flex: "1 1 500px",
+    minWidth: 0,
+    display: "flex",
+    flexDirection: "column",
+    gap: "20px",
+  },
 
-rightColumn: {
-  flex: "1 1 350px",
-  minWidth: 0,
-},
+  rightColumn: {
+    flex: "1 1 350px",
+    minWidth: 0,
+  },
 
   chartBox: {
     background: "linear-gradient(160deg, #2d5a61, #4a6b82)",
@@ -442,19 +479,19 @@ rightColumn: {
   },
 
   /* Table Specific Styles (Matching image_d17182.jpg) */
-alertCard: {
-  background: "linear-gradient(160deg, #6294a0, #7ca1b4)",
-  borderRadius: "15px",
-  padding: "20px",
-  color: "#000",
-  border: "1px solid #94a3b8"
-},
+  alertCard: {
+    background: "linear-gradient(160deg, #6294a0, #7ca1b4)",
+    borderRadius: "15px",
+    padding: "20px",
+    color: "#000",
+    border: "1px solid #94a3b8"
+  },
   alertHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" },
   alertTitle: { margin: 0, fontSize: "18px", fontWeight: "bold" },
   alertIcon: { color: "#ef4444", fontSize: "24px" },
   table: { width: "100%", borderCollapse: "collapse" },
-  tableHeader: {position: "sticky",top: 0,background: "#7ca1b4",zIndex: 1,borderBottom: "1px solid #333"},
-  th: {position: "sticky",top: 0,background: "#7ca1b4",   zIndex: 2,textAlign: "left",padding: "12px 8px",fontSize: "13px",fontWeight: "bold"},
+  tableHeader: { position: "sticky", top: 0, background: "#7ca1b4", zIndex: 1, borderBottom: "1px solid #333" },
+  th: { position: "sticky", top: 0, background: "#7ca1b4", zIndex: 2, textAlign: "left", padding: "12px 8px", fontSize: "13px", fontWeight: "bold" },
   tr: { borderBottom: "1px solid rgba(0,0,0,0.1)" },
   td: { padding: "12px 8px", fontSize: "13px" },
 };

@@ -8,7 +8,7 @@ import ProtectedRoute from "./components/common/Protectedroute";
 import AuthLayout from "./layouts/AuthLayout";
 import DashboardLayout from "./layouts/DashboardLayout";
 import {lazy,Suspense} from "react";
-
+import CustomerLedgerPage from "./pages/customers/CustomerLedgerPage";
 
 // Pages
 const Register = lazy(() => import("./pages/auth/Register"));
@@ -18,6 +18,7 @@ const Dashboard = lazy(() => import("./pages/dashboard/Dashboard"));
 const Products = lazy(() => import("./pages/products/Products"));
 const Customers = lazy(() => import("./pages/customers/Customers"));
 const CreateInvoice = lazy(() => import("./pages/invoices/CreateInvoice"));
+const EditInvoice = lazy(() => import("./pages/invoices/EditInvoice"));
 const InvoicePreview = lazy(() => import("./pages/invoices/InvoicePreview"));
 const Payments = lazy(() => import("./pages/payments/Payments"));
 const Expenses = lazy(() => import("./pages/expenses/Expenses"));
@@ -63,8 +64,15 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/products" element={<Products />} />
           <Route path="/customers" element={<Customers />} />
-          <Route path="/invoice/create" element={<CreateInvoice />} />
-          <Route path="/invoice/preview" element={<InvoicePreview />} />
+          <Route path="/customers/:id/ledger" element={<CustomerLedgerPage />}/>
+              <Route path="/invoice/create" element={<CreateInvoice />} />
+
+              <Route
+                path="/invoice/edit/:id"
+                element={<EditInvoice />}
+              />
+
+              <Route path="/invoice/preview" element={<InvoicePreview />} />
           <Route path="/payments" element={<Payments />} />
           <Route path="/expenses" element={<Expenses />} />
           <Route path="/reports" element={<Reports />} />

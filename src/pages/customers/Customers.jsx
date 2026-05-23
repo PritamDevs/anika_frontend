@@ -137,10 +137,23 @@ useEffect(() => {
       return `"${str.replace(/"/g, '""')}"`;
     };
 
-    const headers = ["Name", "Contact", "Address", "Total Purchase", "Total Paid", "Due Amount"];
+    const headers = [
+      "Name",
+      "Contact",
+      "Address",
+      "Total Purchase",
+      "Total Paid",
+      "Due Amount",
+      "Advance Amount"
+    ];
     const rows = allCustomers.map(c => [
-      c.name, c.contact, c.address || "",
-      c.totalPurchase ?? 0, c.totalPaid ?? 0, c.dueAmount ?? 0
+      c.name,
+      c.contact,
+      c.address || "",
+      c.totalPurchase ?? 0,
+      c.totalPaid ?? 0,
+      c.dueAmount ?? 0,
+      c.advanceAmount ?? 0
     ]);
 
     const csvContent = [
@@ -201,6 +214,7 @@ useEffect(() => {
                   <th style={styles.th}>Total Purchase</th>
                   <th style={styles.th}>Paid</th>
                   <th style={styles.th}>Due</th>
+                  <th style={styles.th}>Advance</th>
                   <th style={styles.th}>Actions</th>
                 </tr>
               </thead>
@@ -210,9 +224,37 @@ useEffect(() => {
                     <td style={styles.td}>{(currentPage - 1) * limit + i + 1}</td>
                     <td style={styles.td}>{c.name}</td>
                     <td style={styles.td}>{c.contact}</td>
-                    <td style={styles.td}>₹ {c.totalPurchase}</td>
-                    <td style={styles.td}>₹ {c.totalPaid}</td>
-                    <td style={{ ...styles.td, ...styles.dueHighlight }}>₹ {c.dueAmount}</td>
+                    <td style={styles.td}>
+                      ₹ {Number(c.totalPurchase || 0).toFixed(2)}
+                    </td>
+
+                    <td style={styles.td}>
+                      ₹ {Number(c.totalPaid || 0).toFixed(2)}
+                    </td>
+
+                    <td
+                      style={{
+                        ...styles.td,
+                        ...styles.dueHighlight
+                      }}
+                    >
+                      ₹ {Number(c.dueAmount || 0).toFixed(2)}
+                    </td>
+
+                    <td
+                      style={{
+                        ...styles.td,
+                        color: "green",
+                        fontWeight: "bold"
+                      }}
+                    >
+                      ₹ {
+                        Number(
+                          c.advanceAmount || 0
+                        ).toFixed(2)
+                      }
+                    </td>
+
                     <td style={styles.actionCell}>
                       <div style={styles.actionButtons}>
                         <button style={styles.editBtn} onClick={() => openEditModal(c)}>✎</button>
