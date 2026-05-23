@@ -8,7 +8,7 @@ import ProtectedRoute from "./components/common/Protectedroute";
 import AuthLayout from "./layouts/AuthLayout";
 import DashboardLayout from "./layouts/DashboardLayout";
 import {lazy,Suspense} from "react";
-import CustomerLedgerPage from "./pages/customers/CustomerLedgerPage";
+import CustomerLedgerPage from "./pages/customers/temp";
 
 // Pages
 const Register = lazy(() => import("./pages/auth/Register"));
