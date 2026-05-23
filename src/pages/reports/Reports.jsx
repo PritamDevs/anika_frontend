@@ -318,7 +318,7 @@ const exportToCSV = () => {
                 <td style={styles.td}> {inv.reference}</td>
                 <td style={styles.td}>
                   <button style={styles.actionBtn} onClick={() => handleView(inv)}>👁️</button>
-                  <button
+                  {/* <button
                     onClick={() => handleEdit(inv)}
                     style={{
                       marginLeft: "8px",
@@ -331,7 +331,7 @@ const exportToCSV = () => {
                     }}
                   >
                     Edit
-                  </button>
+                  </button> */}
                   <button style={styles.actionBtn} onClick ={() => handlePrint(inv)}>📥</button>
                 </td>
               </tr>
