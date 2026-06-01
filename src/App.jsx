@@ -17,7 +17,7 @@ const ResetPassword = lazy(() => import("./pages/auth/ResetPassword"));
 const Dashboard = lazy(() => import("./pages/dashboard/Dashboard"));
 const Products = lazy(() => import("./pages/products/Products"));
 const Customers = lazy(() => import("./pages/customers/Customers"));
-const CustomerDetails = lazy(() =>import("./pages/customers/CustomerDetails"));
+const CustomerDetails = lazy(() =>import("./pages/customers/tempCustomer"));
 const CreateInvoice = lazy(() => import("./pages/invoices/CreateInvoice"));
 const InvoicePreview = lazy(() => import("./pages/invoices/InvoicePreview"));
 const Payments = lazy(() => import("./pages/payments/Payments"));
