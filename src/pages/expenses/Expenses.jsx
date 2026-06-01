@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useEffect } from "react";
 import axios from "axios";
 import { BACKEND_URL } from "../../config/index.js";
+import toast from "react-hot-toast";
+
 
 const Expenses = () => {
   const [expenses, setExpenses] = useState([]);
@@ -40,19 +42,31 @@ const Expenses = () => {
   }, [selectedDate]);
 
   const fetchExpenses = async (date = selectedDate) => {
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const token = localStorage.getItem("token");
+    try {
 
-    const res = await axios.get(
-      `${BACKEND_URL}/api/expenses?year=${year}&month=${month}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+      const token = localStorage.getItem("token");
+
+      const res = await axios.get(
+        `${BACKEND_URL}/api/expenses?year=${year}&month=${month}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
         }
-      }
-    );
-    setExpenses(res.data);
+      );
+
+      setExpenses(res.data);
+
+    } catch (error) {
+
+      toast.error(
+        error?.response?.data?.message ||
+        "Failed to load expenses"
+      );
+
+    }
   };
 
   const handleChange = (e) => {
@@ -61,31 +75,48 @@ const Expenses = () => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
 
-    const token = localStorage.getItem("token");
+    e.preventDefault();
 
-    await axios.post(
-      `${BACKEND_URL}/api/expenses`,
-      form,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
+    try {
+
+      const token =
+        localStorage.getItem("token");
+
+      await axios.post(
+        `${BACKEND_URL}/api/expenses`,
+        form,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
         }
-      }
-    );
+      );
 
-  fetchExpenses();
+      toast.success(
+        "Expense added successfully"
+      );
 
-  setForm({
-    category: "",
-    description: "",
-    vendor: "",
-    amount: "",
-    paymentMode: "Cash",
-    date: new Date().toISOString().split("T")[0],
-  });
-};
+      fetchExpenses();
+
+      setForm({
+        category: "",
+        description: "",
+        vendor: "",
+        amount: "",
+        paymentMode: "Cash",
+        date: new Date().toISOString().split("T")[0]
+      });
+
+    } catch (error) {
+
+      toast.error(
+        error?.response?.data?.message ||
+        "Failed to add expense"
+      );
+
+    }
+  };
 
  const openEditModal = (expense) => {
     setEditingExpense({ ...expense });
@@ -115,8 +146,14 @@ const Expenses = () => {
 
     fetchExpenses(); // refresh data
     setIsEditModalOpen(false);
+    toast.success(
+      "Expense updated successfully"
+    );
   } catch (error) {
-    console.error("Update error:", error);
+    toast.error(
+      error?.response?.data?.message ||
+      "Failed to update expense"
+    );
   }
 };
 
@@ -134,8 +171,14 @@ const Expenses = () => {
       }
     );
     fetchExpenses(); // refresh list from DB
+    toast.success(
+      "Expense deleted successfully"
+    );
   } catch (error) {
-    console.error("Delete error:", error);
+    toast.error(
+      error?.response?.data?.message ||
+      "Failed to delete expense"
+    );
   }
 };
 

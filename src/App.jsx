@@ -8,7 +8,7 @@ import ProtectedRoute from "./components/common/Protectedroute";
 import AuthLayout from "./layouts/AuthLayout";
 import DashboardLayout from "./layouts/DashboardLayout";
 import {lazy,Suspense} from "react";
-import CustomerLedgerPage from "./pages/customers/CustomerLedgerPage.jsx";
+import { Toaster } from "react-hot-toast";
 
 // Pages
 const Register = lazy(() => import("./pages/auth/Register"));
@@ -17,12 +17,14 @@ const ResetPassword = lazy(() => import("./pages/auth/ResetPassword"));
 const Dashboard = lazy(() => import("./pages/dashboard/Dashboard"));
 const Products = lazy(() => import("./pages/products/Products"));
 const Customers = lazy(() => import("./pages/customers/Customers"));
+const CustomerDetails = lazy(() =>import("./pages/customers/CustomerDetails"));
 const CreateInvoice = lazy(() => import("./pages/invoices/CreateInvoice"));
-const EditInvoice = lazy(() => import("./pages/invoices/EditInvoice"));
 const InvoicePreview = lazy(() => import("./pages/invoices/InvoicePreview"));
 const Payments = lazy(() => import("./pages/payments/Payments"));
 const Expenses = lazy(() => import("./pages/expenses/Expenses"));
 const Reports = lazy(() => import("./pages/reports/Reports"));
+const OpeningBalance =lazy(() =>import("./pages/customers/OpeningBalance"));
+
 
 function App() {
   return (
@@ -64,13 +66,10 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/products" element={<Products />} />
           <Route path="/customers" element={<Customers />} />
-          <Route path="/customers/:id/ledger" element={<CustomerLedgerPage />}/>
+          <Route path="/customers/:id" element={<CustomerDetails />}/>
+          <Route path="/customers/opening-balance" element={<OpeningBalance />}/>
               <Route path="/invoice/create" element={<CreateInvoice />} />
 
-              <Route
-                path="/invoice/edit/:id"
-                element={<EditInvoice />}
-              />
 
               <Route path="/invoice/preview" element={<InvoicePreview />} />
           <Route path="/payments" element={<Payments />} />
@@ -84,6 +83,12 @@ function App() {
 
     </Routes>
    </Suspense>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3000
+        }}
+      />
   </ErrorBoundary>
   );
 }

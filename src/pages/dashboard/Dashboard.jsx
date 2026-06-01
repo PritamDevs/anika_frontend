@@ -1,11 +1,10 @@
-
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useMemo } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, BarChart, Bar } from "recharts";
 import { BACKEND_URL } from "../../config/index.js";
 import { socket } from "../../socket";
+
 
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
@@ -30,7 +29,6 @@ const Dashboard = () => {
 
   const [stats, setStats] = useState({
     totalSales: 0,
-    outstanding: 0,
     totalOutstanding: 0,
     totalCustomers: 0,
     openInvoices: 0,
@@ -93,7 +91,11 @@ const Dashboard = () => {
 
       setMonthlySales(data);
     } catch (err) {
-      console.error("Monthly Sales Error:", err);
+
+      console.error(
+        "Monthly Sales Error:",
+        err
+      );
     }
   };
 
@@ -110,7 +112,11 @@ const Dashboard = () => {
       const data = await res.json();
       setTopCustomers(data);
     } catch (err) {
-      console.error("Top Customers Error:", err);
+
+      console.error(
+        "Top Customers Error:",
+        err
+      );
     }
   };
 
@@ -126,14 +132,17 @@ const Dashboard = () => {
       const data = await res.json();
       setStats({
         totalSales: data.totalSales ?? 0,
-        outstanding: data.outstanding ?? 0,
         totalOutstanding: data.totalOutstanding ?? 0,
         totalCustomers: data.totalCustomers ?? 0,
         openInvoices: data.openInvoices ?? 0
       });
       setLowStockData(data.lowStockProducts ?? []);
     } catch (error) {
-      console.error("Dashboard fetch error:", error);
+
+      console.error(
+        "Dashboard fetch error:",
+        error
+      );
     }
   };
 
@@ -202,14 +211,6 @@ const Dashboard = () => {
           value={`₹ ${stats.totalSales.toLocaleString("en-IN")}`}
           icon="🪄"
           valueColor="#9ae6b4"
-        />
-
-        <StatCard
-          title="PENDING DUE"
-          subtitle="THIS MONTH"
-          value={`₹ ${stats.outstanding.toLocaleString("en-IN")}`}
-          icon="🕒"
-          valueColor="#ef4444"
         />
 
         <StatCard

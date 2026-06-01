@@ -1,128 +1,71 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
-import { BACKEND_URL } from "../../config/index.js";
+import { loginUser } from "../../services/authService";
 import { reconnectSocket } from "../../socket";
+import toast from "react-hot-toast";
+import LoginLoader from "../../components/common/LoginLoader.jsx";
 
 const Login = () => {
   const navigate = useNavigate();
 
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     username: "",
     password: "",
     remember: false,
   });
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
-  const [showResetPassword, setShowResetPassword] = useState(false);
-
-  const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [resetToken, setResetToken] = useState("");
-  const [showForgotBox, setShowForgotBox] = useState(false);
-  const [resetEmail, setResetEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setLoading(true);
+
     if (!formData.username || !formData.password) {
-      alert("Please enter username and password");
+      toast.error(
+        "Please enter username and password"
+      );
+      setLoading(false);
       return;
     }
 
     try {
-      const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          username: formData.username.trim(),
-          password: formData.password
-        })
-      });
+      const data = await loginUser(
+        formData.username.trim(),
+        formData.password
+      );
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.message);
-        return;
-      }
       localStorage.setItem("token", data.token);
-      
+
       reconnectSocket(data.token);
-      
-      navigate("/dashboard");
+
+      toast.success("Login Successful");
+
+      setTimeout(() => {
+        setLoading(false);
+        navigate("/dashboard");
+      }, 500);
+
       // localStorage.setItem("role", data.role);
 
       // eslint-disable-next-line no-unused-vars
     } catch (err) {
-      alert("Server error");
+      console.error(err);
+
+      setLoading(false);
+
+      toast.error(
+        err?.response?.data?.message ||
+        "Login failed"
+      );
     }
   };
 
-  /* ================= SEND OTP ================= */
-  const handleSendOTP = async () => {
-    if (!email) return alert("Enter email");
-
-    const res = await fetch(`${BACKEND_URL}/api/auth/forgot-password`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email })
-    });
-
-    const data = await res.json();
-    if (!res.ok) return alert(data.message);
-
-    setOtpSent(true);
-    alert("OTP sent to email");
-  };
-
-  /* ================= VERIFY OTP ================= */
-  const handleVerifyOtp = async () => {
-    const res = await fetch(`${BACKEND_URL}/api/auth/verify-otp`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, otp })
-    });
-
-
-    const data = await res.json();
-    if (!res.ok) return alert(data.message);
-    setResetToken(data.resetToken);
-    setShowResetPassword(true);
-  };
-
-
-  /* ================= RESET PASSWORD ================= */
-  const handleResetPassword = async () => {
-    if (newPassword !== confirmPassword) {
-      return alert("Passwords do not match");
-    }
-
-    const res = await fetch(`${BACKEND_URL}/api/auth/reset-password`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: resetToken, newPassword })
-    });
-
-    const data = await res.json();
-    if (!res.ok) return alert(data.message);
-
-    alert("Password changed successfully");
-
-    setShowResetPassword(false);
-    setIsModalOpen(false);
-    setOtpSent(false);
-    navigate("/");
-  };
 
   return (
+      <>
+      {loading && <LoginLoader />}
     <div style={styles.container}>
       <img src={logo} alt="logo" style={styles.logo} />
       <h2 style={styles.heading}>Anika Enterprise</h2>
@@ -152,78 +95,16 @@ const Login = () => {
           />
         </div>
 
-        <button type="submit" style={styles.button}>
-          Login
-        </button>
-        {/* <p
-      style={styles.forgot}
-      onClick={async () =>setShowForgotBox(true)}
->
-  Forgot Password?
-</p>
-         */}
-        {/* <p
-        style={{ cursor: "pointer", color: "blue" }}
-        onClick={() => navigate("/register")}
-        >
-         Create Account
-        </p> */}
-
-
-
+          <button
+            type="submit"
+            style={styles.button}
+            disabled={loading}
+          >
+            {loading ? "Signing In..." : "Login"}
+          </button>
       </form>
-      {showForgotBox && (
-        <div style={forgotStyles.overlay}>
-          <div style={forgotStyles.box}>
-
-            <button
-              style={forgotStyles.close}
-              onClick={() => setShowForgotBox(false)}
-            >
-              ✕
-            </button>
-
-            <img src={logo} alt="logo" style={forgotStyles.logo} />
-            <h3 style={forgotStyles.title}>Reset Password</h3>
-            <p style={forgotStyles.subtitle}>
-              Enter your registered email
-            </p>
-
-            <input
-              type="email"
-              placeholder="Email address"
-              value={resetEmail}
-              onChange={(e) => setResetEmail(e.target.value)}
-              style={forgotStyles.input}
-            />
-
-            <button
-              style={forgotStyles.button}
-              onClick={async () => {
-                if (!resetEmail) return alert("Enter email");
-
-                setLoading(true);
-
-                const res = await fetch(`${BACKEND_URL}/api/auth/forgot-password`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ email: resetEmail }),
-                });
-
-                const data = await res.json();
-                alert(data.message);
-
-                setLoading(false);
-                setShowForgotBox(false);
-              }}
-            >
-              {loading ? "Sending..." : "Send Reset Link"}
-            </button>
-
-          </div>
-        </div>
-      )}
     </div>
+    </>
   );
 };
 

@@ -8,6 +8,7 @@ import {
   BarChart, Bar
 } from "recharts";
 import { BACKEND_URL } from "../../config/index";
+import toast from "react-hot-toast";
 
 const Reports = () => {
   const navigate = useNavigate();
@@ -85,15 +86,34 @@ const years = Array.from({ length: 5 }, (_, i) =>
 
 }, [selectedDate]);
 
-const fetchReports = async (date = selectedDate) => {
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1;
+  const fetchReports = async (date = selectedDate) => {
 
-  const res = await axios.get(`${BACKEND_URL}/api/reports?year=${year}&month=${month}`);
-  setSummary(res.data.summary);
-  setInvoices(res.data.invoices);
-  setFilteredInvoices(res.data.invoices);
-};
+    try {
+
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+
+      const res = await axios.get(
+        `${BACKEND_URL}/api/reports?year=${year}&month=${month}`
+      );
+
+      setSummary(res.data.summary);
+      setInvoices(res.data.invoices);
+      setFilteredInvoices(res.data.invoices);
+
+    } catch (error) {
+
+      console.error(
+        "Reports Fetch Error:",
+        error
+      );
+
+      toast.error(
+        "Failed to load reports"
+      );
+
+    }
+  };
 const handleView = (inv) => {
   navigate("/Invoice/Preview", {
     state: {
@@ -132,14 +152,28 @@ const fetchMonthlyChart = async (year, month) => {
     
     setChartData(mapped);
   } catch (err) {
-    console.error("Chart Fetch Error:", err);
+
+    console.error(
+      "Chart Fetch Error:",
+      err
+    );
+
+    toast.error(
+      "Failed to load chart data"
+    );
+
   }
 };
 const exportToCSV = () => {
   if (!invoices.length) {
-    alert("No invoices found");
+
+    toast.error(
+      "No invoices found"
+    );
+
     return;
   }
+
 
   // Helper function to escape CSV fields
   const escapeCSV = (field) => {
@@ -188,6 +222,9 @@ const exportToCSV = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    toast.success(
+      "Report exported successfully"
+    );
   }
 };
 

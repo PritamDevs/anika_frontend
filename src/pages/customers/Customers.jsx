@@ -1,6 +1,15 @@
 import { useState, useEffect,useRef } from "react";
-import { BACKEND_URL } from "../../config/index.js";
 import { socket } from "../../socket";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { BACKEND_URL } from "../../config/index.js";
+import {
+  getCustomers,
+  deleteCustomer,
+  createCustomer,
+  updateCustomer,
+} from "../../services/customerService";
+import DataLoader from "../../components/common/DataLoader.jsx";
 
 const Customers = () => {
   const [customers, setCustomers] = useState([]);
@@ -18,25 +27,26 @@ const Customers = () => {
     name: "",
     contact: "",
     address: "",
-    totalPurchase: "",
-    paid: ""
   });
 
   const fetchCustomers = async (page = 1, search = "") => {
-    const token = localStorage.getItem("token");
     setLoading(true);
+
     try {
-      const res = await fetch(
-        `${BACKEND_URL}/api/customers?page=${page}&limit=${limit}&search=${search}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+      const data = await getCustomers(
+        page,
+        limit,
+        search
       );
-      const data = await res.json();
+
       setCustomers(data.customers);
       setTotal(data.total);
       setTotalPages(data.totalPages);
       setCurrentPage(page);
     } catch {
-      alert("Failed to load customers");
+      toast.error(
+        "Failed to load customers"
+      );
     } finally {
       setLoading(false);
     }
@@ -65,7 +75,7 @@ useEffect(() => {
 
   const openAddModal = () => {
     setEditCustomer(null);
-    setFormData({ name: "", contact: "", address: "", totalPurchase: "", paid: "" });
+    setFormData({ name: "", contact: "", address: "" });
     setIsModalOpen(true);
   };
 
@@ -74,46 +84,73 @@ useEffect(() => {
     setFormData({
       name: customer.name,
       contact: customer.contact,
-      address: customer.address,
-      totalPurchase: customer.totalPurchase,
-      paid: customer.totalPaid
+      address: customer.address
     });
     setIsModalOpen(true);
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this customer?")) return;
-    const token = localStorage.getItem("token");
-    await fetch(`${BACKEND_URL}/api/customers/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    fetchCustomers(currentPage, searchTerm);
+
+    try {
+      await deleteCustomer(id);
+
+      toast.success(
+        "Customer deleted successfully"
+      );
+
+      fetchCustomers(
+        currentPage,
+        searchTerm
+      );
+    } catch {
+      toast.error(
+        "Failed to delete customer"
+      );
+    }
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
+
     if (!formData.name) {
-      alert("Name required");
+      toast.error(
+        "Customer name is required"
+      );
       return;
     }
-    const token = localStorage.getItem("token");
-    const url = editCustomer
-      ? `${BACKEND_URL}/api/customers/${editCustomer._id}`
-      : `${BACKEND_URL}/api/customers/add`;
-    const method = editCustomer ? "PUT" : "POST";
 
-    await fetch(url, {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify(formData)
-    });
+    try {
+      if (editCustomer) {
+        await updateCustomer(
+          editCustomer._id,
+          formData
+        );
+      } else {
+        await createCustomer(
+          formData
+        );
+      }
 
-    setIsModalOpen(false);
-    fetchCustomers(currentPage, searchTerm);
+      setIsModalOpen(false);
+
+      toast.success(
+        editCustomer
+          ? "Customer updated successfully"
+          : "Customer added successfully"
+      );
+
+      fetchCustomers(
+        currentPage,
+        searchTerm
+      );
+
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message ||
+        "Failed to save customer"
+      );
+    }
   };
 
   const exportCustomersToCSV = async () => {
@@ -127,7 +164,9 @@ useEffect(() => {
     const allCustomers = data.customers;
 
     if (!allCustomers.length) {
-      alert("No customers found");
+      toast.error(
+        "No customers found"
+      );
       return;
     }
 
@@ -167,11 +206,13 @@ useEffect(() => {
     link.download = "Customer_List.csv";
     link.click();
   } catch {
-    alert("Failed to export customers");
+    toast.error(
+      "Failed to export customers"
+    );
   }
 };
 
-  
+const navigate = useNavigate(); 
 
   return (
     <div style={styles.container}>
@@ -194,17 +235,27 @@ useEffect(() => {
           <button style={styles.exportBtn} onClick={exportCustomersToCSV}>
             📥 Export CSV
           </button>
+          <button
+            style={styles.openingBalanceBtn}
+            onClick={() =>
+              navigate("/customers/opening-balance")
+            }
+          >
+            💰 Opening Balance
+          </button>
         </div>
       </div>
 
       {/* TABLE */}
       <div style={styles.tableWrapper}>
         {loading ? (
-          <div style={{ textAlign: "center", padding: "60px", color: "#64748b", fontSize: "16px" }}>
-            Loading...
-          </div>
+          <DataLoader
+            title="Loading customer records..."
+            subtitle="Fetching customer data"
+          />
         ) : (
           <>
+          <div className="content-fade">
             <table style={styles.table}>
               <thead>
                 <tr>
@@ -257,6 +308,7 @@ useEffect(() => {
 
                     <td style={styles.actionCell}>
                       <div style={styles.actionButtons}>
+                        <button style={styles.viewBtn} onClick={() => navigate(`/customers/${c._id}`)}>👁</button>
                         <button style={styles.editBtn} onClick={() => openEditModal(c)}>✎</button>
                         <button style={styles.deleteBtn} onClick={() => handleDelete(c._id)}>🗑</button>
                       </div>
@@ -265,6 +317,7 @@ useEffect(() => {
                 ))}
               </tbody>
             </table>
+            </div>
 
             {customers.length === 0 && (
               <div style={styles.emptyState}>No customers found</div>
@@ -344,20 +397,6 @@ useEffect(() => {
                 value={formData.address}
                 onChange={e => setFormData({ ...formData, address: e.target.value })}
                 style={styles.textarea}
-              />
-              <input
-                type="number"
-                placeholder="Total Purchase"
-                value={formData.totalPurchase}
-                onChange={e => setFormData({ ...formData, totalPurchase: e.target.value })}
-                style={styles.input}
-              />
-              <input
-                type="number"
-                placeholder="Paid"
-                value={formData.paid}
-                onChange={e => setFormData({ ...formData, paid: e.target.value })}
-                style={styles.input}
               />
               <div style={styles.modalActions}>
                 <button type="button" onClick={() => setIsModalOpen(false)} style={styles.cancelBtn}>
@@ -552,7 +591,24 @@ const styles = {
     color: "#334155",
     cursor: "pointer",
     fontSize: "14px"
-  }
+  },
+  viewBtn: {
+    backgroundColor: "#3b82f6",
+    color: "#fff",
+    border: "none",
+    borderRadius: "5px",
+    padding: "6px 10px",
+    cursor: "pointer"
+  },
+  openingBalanceBtn: {
+    padding: "10px 20px",
+    backgroundColor: "#0f766e",
+    color: "#fff",
+    border: "none",
+    borderRadius: "10px",
+    cursor: "pointer",
+    fontWeight: "bold"
+  },
 };
 
 export default Customers;

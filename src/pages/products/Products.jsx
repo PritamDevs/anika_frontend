@@ -1,7 +1,14 @@
 import { useEffect, useState } from "react";
 import AddEditProduct from "./AddEditProduct";
-import { BACKEND_URL } from "../../config/index.js";
 import { socket } from "../../socket";
+import toast from "react-hot-toast";
+import {
+  getProducts,
+  deleteProduct,
+  createProduct,
+  updateProduct,
+} from "../../services/productService";
+import DataLoader from "../../components/common/DataLoader.jsx";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -16,27 +23,38 @@ const Products = () => {
   const [total, setTotal] = useState(0);
   const limit = 20;
 
-const fetchProducts = async (page = 1, search = "") => {
-  const token = localStorage.getItem("token");
-  setLoading(true);
-  try {
-    const res = await fetch(
-      `${BACKEND_URL}/api/products?page=${page}&limit=${limit}&search=${search}`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    if (!res.ok) throw new Error("Failed to fetch products");
-    const data = await res.json();
-    setProducts(data.products);
-    setTotal(data.total);
-    setTotalPages(data.totalPages);
-    setCurrentPage(page);
-  } catch (err) {
-    console.error("Product fetch error:", err);
-    alert("Failed to fetch products");
-  } finally {
-    setLoading(false);
-  }
-};
+  const fetchProducts = async (
+    page = 1,
+    search = ""
+  ) => {
+    setLoading(true);
+
+    try {
+      const data = await getProducts(
+        page,
+        limit,
+        search
+      );
+
+      setProducts(data.products);
+      setTotal(data.total);
+      setTotalPages(data.totalPages);
+      setCurrentPage(page);
+
+    } catch (err) {
+      console.error(
+        "Product fetch error:",
+        err
+      );
+
+      toast.error(
+        "Failed to fetch products"
+      );
+
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchProducts(1, searchTerm);
@@ -65,66 +83,82 @@ const fetchProducts = async (page = 1, search = "") => {
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this product?")) return;
-    const token = localStorage.getItem("token");
+
     try {
-      await fetch(`${BACKEND_URL}/api/products/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      fetchProducts(currentPage, searchTerm);
-    } catch {
-      alert("Delete failed");
+      await deleteProduct(id);
+
+      await fetchProducts(
+        currentPage,
+        searchTerm
+      );
+
+      toast.success(
+        "Product deleted successfully"
+      );
+
+    } catch (err) {
+
+      toast.error(
+        err?.response?.data?.message ||
+        "Delete failed"
+      );
+
     }
   };
-
+  
   const handleSaveProduct = async (data) => {
-    const token = localStorage.getItem("token");
     try {
-      let res;
+
       if (editProduct) {
-        res = await fetch(`${BACKEND_URL}/api/products/${editProduct._id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify({
+
+        await updateProduct(
+          editProduct._id,
+          {
             name: data.name,
             rate: data.rate,
             discount: data.discount,
             stockQty: data.stockQty,
             addStock: data.addStock,
             lowStockAlert: data.lowStockAlert
-          })
-        });
+          }
+        );
+
       } else {
-        res = await fetch(`${BACKEND_URL}/api/products/add`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            name: data.name,
-            rate: data.rate,
-            discount: data.discount,
-            stockQty: data.stockQty,
-            lowStockAlert: data.lowStockAlert
-          })
+
+        await createProduct({
+          name: data.name,
+          rate: data.rate,
+          discount: data.discount,
+          stockQty: data.stockQty,
+          lowStockAlert: data.lowStockAlert
         });
+
       }
 
-      const result = await res.json();
-      if (!res.ok) {
-        alert(`Error ${res.status}: ${result.message || "Unknown error"}`);
-        return;
-      }
+      const successMessage =
+        editProduct
+          ? "Product updated successfully"
+          : "Product added successfully";
 
       setIsModalOpen(false);
       setEditProduct(null);
-      fetchProducts(currentPage, searchTerm);
+
+      await fetchProducts(
+        currentPage,
+        searchTerm
+      );
+
+      toast.success(
+        successMessage
+      );
+
     } catch (err) {
-      alert("Save failed: " + err.message);
+
+      toast.error(
+        err?.response?.data?.message ||
+        "Save failed"
+      );
+
     }
   };
 
@@ -160,11 +194,13 @@ const fetchProducts = async (page = 1, search = "") => {
       {/* TABLE */}
       <div style={styles.tableWrapper}>
         {loading ? (
-          <div style={{ textAlign: "center", padding: "60px", color: "#64748b", fontSize: "16px" }}>
-            Loading...
-          </div>
+          <DataLoader
+            title="Loading product catalog..."
+            subtitle="Fetching products from server"
+          />
         ) : (
           <>
+          <div className="content-fade">
             <table style={styles.table}>
               <thead>
                 <tr>
@@ -194,6 +230,7 @@ const fetchProducts = async (page = 1, search = "") => {
                 ))}
               </tbody>
             </table>
+          </div>
 
             {products.length === 0 && (
               <div style={styles.emptyState}>No products found</div>
@@ -259,6 +296,7 @@ const fetchProducts = async (page = 1, search = "") => {
     </div>
   );
 };
+
 
 const styles = {
   container: {

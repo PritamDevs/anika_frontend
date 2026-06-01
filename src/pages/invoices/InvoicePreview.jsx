@@ -218,7 +218,10 @@ body.thermal-print .divider{
           </div>
 
           <div style={styles.metaSection}>
-            <p><strong>Invoice No.-</strong> &nbsp; {invoice.invoiceNo}</p>
+            <p>
+              <strong>Invoice No.-</strong>
+              {invoice.invoiceNo || invoice.invoiceNumber}
+            </p>
             <p><strong>Date:</strong> &nbsp; {invoice.date}</p>
             <div style={styles.customerRow}>
               <span style={styles.customerLabel}>
@@ -252,7 +255,9 @@ body.thermal-print .divider{
               {invoice.items.map((item, index) => (
                 <tr key={index}>
                   <td style={styles.td}>{index + 1}</td>
-                  <td style={styles.td}>{item.productName}</td>
+                  <td style={styles.td}>
+                    {item.productName || item.name || "Product"}
+                  </td>
                   <td style={styles.td}>{item.qty}</td>
                   <td style={styles.td}>{item.discount}%</td>
                   <td style={styles.td}>{item.rate}</td>
@@ -264,13 +269,14 @@ body.thermal-print .divider{
 
           {/* THERMAL RECEIPT FORMAT */}
           <div className="thermal-items">
-            {invoice.items.map((item, index) => (
+            {(invoice.items || invoice.products || []).map((item, index) => (
               <div key={index} className="thermal-item">
 
                 <div className="divider"></div>
 
                 <div className="product">
-                  {item.productName?.toUpperCase()}
+                  (item.productName || item.name || "PRODUCT")
+                  .toUpperCase()
                 </div>
 
                 <div className="line">
@@ -309,7 +315,13 @@ body.thermal-print .divider{
             <div style={styles.totalRow}>
               <span style={styles.totalLabel}>Grand Total</span>
               <span style={styles.totalValue}>
-                ₹ {Number(invoice.grandTotal || 0).toFixed(2)}
+                ₹ {
+                  Number(
+                    invoice.grandTotal ??
+                    invoice.totalAmount ??
+                    0
+                  ).toFixed(2)
+                }
               </span>
             </div>
 
@@ -321,7 +333,7 @@ body.thermal-print .divider{
               </span>
             </div>
 
-            {/* ✅ Advance Used */}
+            {/* ✅ Advance Used
             <div style={styles.totalRow}>
               <span style={styles.totalLabel}>Advance Used</span>
               <span
@@ -336,13 +348,19 @@ body.thermal-print .divider{
                   ).toFixed(2)
                 }
               </span>
-            </div>
+            </div> */}
 
             {/* ✅ Paid */}
             <div style={styles.totalRow}>
               <span style={styles.totalLabel}>Paid</span>
               <span style={styles.totalValue}>
-                ₹ {Number(invoice.paid || 0).toFixed(2)}
+                ₹ {
+                  Number(
+                    invoice.paid ??
+                    invoice.paidAmount ??
+                    0
+                  ).toFixed(2)
+                }
               </span>
             </div>
 
@@ -356,7 +374,9 @@ body.thermal-print .divider{
               <span style={{ ...styles.totalValue, fontWeight: "bold" }}>
                 ₹ {
                   Number(
-                    invoice.totalDueAmount || 0
+                    invoice.totalDueAmount ??
+                    invoice.balance ??
+                    0
                   ).toFixed(2)
                 }
               </span>

@@ -1,8 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import HoverButton from "../../components/common/HoverButton";
-import { BACKEND_URL } from "../../config/index.js";
 import { socket } from "../../socket";
+import toast from "react-hot-toast";
+import { getAllCustomers, createCustomer } from "../../services/customerService";
+import { getAllProducts } from "../../services/productService";
+import { createInvoice } from "../../services/invoiceService";
 
 const CreateInvoice = () => {
   const navigate = useNavigate();
@@ -21,6 +24,7 @@ const CreateInvoice = () => {
 
   const [previousDue, setPreviousDue] = useState(0);
   const [items, setItems] = useState([]);
+  const [productDropdowns, setProductDropdowns] = useState({});
   const [paidAmount, setPaidAmount] = useState(0);
   const advanceAmount =
     selectedCustomer?.advanceAmount || 0;
@@ -53,46 +57,67 @@ const CreateInvoice = () => {
   }, []);
 
   const fetchCustomers = async () => {
-    const token = localStorage.getItem("token");
-
     try {
-      const res = await fetch(`${BACKEND_URL}/api/customers/all`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const customers =
+        await getAllCustomers();
 
-      if (!res.ok) throw new Error("Failed to fetch customers");
+      console.log(
+        "ALL CUSTOMERS:",
+        customers
+      );
 
-      const data = await res.json();
-      setCustomers(data.customers);
+      setCustomers(customers);
 
     } catch (err) {
-      console.error("Customer fetch error:", err);
-      alert("Failed to load customers");
+
+      console.error(
+        "Customer fetch error:",
+        err
+      );
+
+      toast.error(
+        err?.response?.data?.message ||
+        "Failed to load customers"
+      );
     }
   };
 
   const fetchProducts = async () => {
-    const token = localStorage.getItem("token");
-
     try {
-      const res = await fetch(`${BACKEND_URL}/api/products/all`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
 
-      if (!res.ok) throw new Error("Failed to fetch products");
+      const products =
+        await getAllProducts();
 
-      const data = await res.json();
-      setProducts(data.products);
+      const sortedProducts =
+        [...products].sort(
+          (a, b) =>
+            a.name.localeCompare(
+              b.name,
+              undefined,
+              {
+                sensitivity: "base"
+              }
+            )
+        );
+
+      setProducts(sortedProducts);
 
     } catch (err) {
-      console.error("Product fetch error:", err);
-      alert("Failed to load products");
+
+      console.error(
+        "Product fetch error:",
+        err
+      );
+
+      toast.error(
+        err?.response?.data?.message ||
+        "Failed to load products"
+      );
     }
   };
   /* ---- Handlers ---- */
 
   const handleCustomerChange = async (id) => {
-    const token = localStorage.getItem("token");
 
     // Show name immediately from stale list
     const local = customers.find(c => c._id === id);
@@ -100,11 +125,16 @@ const CreateInvoice = () => {
 
     try {
       // Always fetch fresh list to get latest dueAmount
-      const res = await fetch(`${BACKEND_URL}/api/customers/all`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-      const fresh = data.customers.find(c => String(c._id) === String(id));
+      const customers =
+        await getAllCustomers();
+
+      const fresh =
+        customers.find(
+          c =>
+            String(c._id) ===
+            String(id)
+        );
+
       const source = fresh || local;
       if (!source) return;
 
@@ -124,6 +154,9 @@ const CreateInvoice = () => {
 
     } catch (err) {
       console.error(err);
+      toast.error(
+        "Failed to refresh customer details"
+      );
       if (local) {
         setSelectedCustomer({ _id: local._id, name: local.name, contact: local.contact, address: local.address });
         setPreviousDue(Number(local.dueAmount || 0));
@@ -137,6 +170,7 @@ const CreateInvoice = () => {
       {
         productId: "",
         productName: "",
+        productSearch: "",
         qty: 1,
         rate: 0,
         discount: 0,
@@ -164,6 +198,7 @@ const CreateInvoice = () => {
       ...updated[index],
       productId: product._id,
       productName: product.name,
+      productSearch: product.name,
       rate,
       discount,
       stockQty: Number(product.stockQty || 0),
@@ -184,7 +219,9 @@ const CreateInvoice = () => {
         if (Number(value) < 0) value = 0;
 
         if (stock <= 0) {
-          alert("This product is out of stock");
+          toast.error(
+            "This product is out of stock"
+          );
           return prev;
         }
       }
@@ -212,50 +249,49 @@ const CreateInvoice = () => {
 
   /* ---- Generate & Navigate ---- */
   const handleGenerateInvoice = async () => {
-    const token = localStorage.getItem("token");
+
     if (loading) return;
 
     setLoading(true);
 
     if (!selectedCustomer._id || items.length === 0) {
-      alert("Please select a customer and add products");
+      toast.error(
+        "Please select a customer and add products"
+      );
       setLoading(false);
       return;
     }
 
     if (hasInvalidStock) {
-      alert("Fix stock issues first");
+      toast.error(
+        "Fix stock issues first"
+      );
       setLoading(false);
       return;
     }
 
     try {
-      const res = await fetch(`${BACKEND_URL}/api/invoices/create`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          customerId: selectedCustomer._id,
-          products: items.map(i => ({
-            productId: i.productId,
-            qty: i.qty,
-            rate: i.rate,
-            discount: Number(i.discount) || 0
-          })),
-          paidAmount,
-          previousAmount: previousDue,
-          advanceUsed,
-        })
-      });
+      const data =
+        await createInvoice({
+          customerId:
+            selectedCustomer._id,
 
-      const data = await res.json();
+          products:
+            items.map(i => ({
+              productId:
+                i.productId,
+              qty: i.qty,
+              rate: i.rate,
+              discount:
+                Number(i.discount) || 0
+            })),
 
-      if (!res.ok) {
-        alert(data.message || "Failed to create invoice");
-        return;
-      }
+          paidAmount
+        });
+
+      toast.success(
+        "Invoice created successfully"
+      );
 
       navigate("/Invoice/Preview", {
         state: {
@@ -272,18 +308,32 @@ const CreateInvoice = () => {
               total: (p.qty * p.rate) * (1 - p.discount / 100)
             })),
             grandTotal: data.invoice.totalAmount,
+
             paid: data.invoice.paidAmount,
-            balance: data.invoice.totalDueAmount,
-            previousAmount: data.invoice.previousAmount
+
+            previousAmount:
+              data.invoice.previousAmount,
+
+            totalDueAmount:
+              data.invoice.totalDueAmount ??
+              data.invoice.balance,
           }
         }
       });
 
     } catch (err) {
+
       console.error(err);
-      alert("Server error");
+
+      toast.error(
+        err?.response?.data?.message ||
+        "Failed to create invoice"
+      );
+
     } finally {
-      setTimeout(() => setLoading(false), 1000);
+
+      setLoading(false);
+
     }
   };
 
@@ -301,36 +351,26 @@ const CreateInvoice = () => {
 
 
   const handleCreateCustomer = async (e) => {
-    const token = localStorage.getItem("token");
     e.preventDefault();
 
     if (!newCustomer.name) {
-      alert("Name required");
+      toast.error(
+        "Name required"
+      );
       return;
     }
 
     try {
-      const res = await fetch(`${BACKEND_URL}/api/customers/add`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
+      const data =
+        await createCustomer({
           name: newCustomer.name,
-          contact: newCustomer.contact || "",
-          address: newCustomer.address,
+          contact:
+            newCustomer.contact || "",
+          address:
+            newCustomer.address,
           totalPurchase: 0,
           paid: 0
-        })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.message || "Failed to create customer");
-        return;
-      }
+        });
 
       // ✅ Refresh customer list
       setCustomers(prev => [...prev, data.customer]);
@@ -349,7 +389,10 @@ const CreateInvoice = () => {
       setNewCustomer({ name: "", contact: "", address: "" });
 
     } catch (err) {
-      alert("Server error");
+      toast.error(
+        err?.response?.data?.message ||
+        "Failed to create customer"
+      );
     }
   };
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
@@ -483,7 +526,7 @@ const CreateInvoice = () => {
               }}
                 onClick={(e) => e.stopPropagation()}
               >
-                {customers
+                {(customers || [])
                   .filter(c => customerSearch === "" || c.name.toLowerCase().startsWith(customerSearch.toLowerCase()))
                   .map(c => (
                     <div
@@ -505,11 +548,27 @@ const CreateInvoice = () => {
                       {c.name}
                     </div>
                   ))}
-                {customers.filter(c => customerSearch === "" || c.name.toLowerCase().startsWith(customerSearch.toLowerCase())).length === 0 && (
-                  <div style={{ padding: "10px 15px", color: "#94a3b8", fontSize: "14px" }}>
-                    No customers found
-                  </div>
-                )}
+                {(customers || [])
+                  .filter(
+                    c =>
+                      customerSearch === "" ||
+                      c.name
+                        .toLowerCase()
+                        .startsWith(
+                          customerSearch.toLowerCase()
+                        )
+                  )
+                  .length === 0 && (
+                    <div
+                      style={{
+                        padding: "10px 15px",
+                        color: "#94a3b8",
+                        fontSize: "14px"
+                      }}
+                    >
+                      No customers found
+                    </div>
+                  )}
               </div>
             )}
           </div>
@@ -527,6 +586,7 @@ const CreateInvoice = () => {
                 <th style={styles.th}>SL.</th>
                 <th style={styles.th}>Product</th>
                 <th style={styles.th}>Stock</th>
+
                 <th style={styles.th}>Qty</th>
                 <th style={styles.th}>Rate</th>
                 <th style={styles.th}>Disc%</th>
@@ -538,15 +598,100 @@ const CreateInvoice = () => {
               {items.map((item, i) => (
                 <tr key={i}>
                   <td style={styles.td}>{i + 1}</td>
-                  <td style={styles.td}>
-                    <select
-                      style={styles.tableSelect}
-                      value={item.productId}
-                      onChange={(e) => handleProductChange(i, e.target.value)}
+                  <td
+                    style={{
+                      ...styles.td,
+                      overflow: "visible",
+                      position: "relative",
+                      zIndex: productDropdowns[i] ? 9999 : 1,
+                      minWidth: "220px"
+                    }}
+                  >
+                    <div
+                      style={{
+                        position: "relative",
+                        overflow: "visible"
+                      }}
                     >
-                      <option value="">Select Product</option>
-                      {products.map(p => <option key={p._id} value={p._id}>{p.name}</option>)}
-                    </select>
+                      <input
+                        style={styles.tableSelect}
+                        placeholder="Search Product..."
+                        value={item.productSearch || ""}
+                        onChange={(e) => {
+                          const updated = [...items];
+
+                          updated[i].productSearch =
+                            e.target.value;
+
+                          setItems(updated);
+
+                          setProductDropdowns(prev => ({
+                            ...prev,
+                            [i]: true
+                          }));
+                        }}
+                        onFocus={() =>
+                          setProductDropdowns(prev => ({
+                            ...prev,
+                            [i]: true
+                          }))
+                        }
+                      />
+
+                      {productDropdowns[i] && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: "38px",
+                            left: 0,
+                            width: "250px",
+                            background: "#fff",
+                            border: "1px solid #cbd5e1",
+                            borderRadius: "8px",
+                            maxHeight: "200px",
+                            overflowY: "auto",
+                            zIndex: 99999,
+                            boxShadow: "0 6px 20px rgba(0,0,0,0.15)"
+                          }}
+                        >
+                          {products
+                            .filter(p =>
+                              item.productSearch === "" ||
+                              p.name
+                                .toLowerCase()
+                                .includes(
+                                  item.productSearch.toLowerCase()
+                                )
+                            )
+                            .map(p => (
+                              <div
+                                key={p._id}
+                                onClick={() => {
+                                  handleProductChange(
+                                    i,
+                                    p._id
+                                  );
+
+                                  setProductDropdowns(
+                                    prev => ({
+                                      ...prev,
+                                      [i]: false
+                                    })
+                                  );
+                                }}
+                                style={{
+                                  padding: "10px",
+                                  cursor: "pointer",
+                                  borderBottom:
+                                    "1px solid #eee"
+                                }}
+                              >
+                                {p.name}
+                              </div>
+                            ))}
+                        </div>
+                      )}
+                    </div>
                   </td>
                   {/* ✅ ADD THIS STOCK COLUMN */}
                   <td
@@ -636,8 +781,16 @@ const CreateInvoice = () => {
               <input
                 style={styles.summaryInput}
                 type="number"
+                min="0"
                 value={paidAmount}
-                onChange={(e) => setPaidAmount(Number(e.target.value))}
+                onChange={(e) =>
+                  setPaidAmount(
+                    Math.max(
+                      0,
+                      Number(e.target.value) || 0
+                    )
+                  )
+                }
               />
             </div>
 
@@ -806,7 +959,8 @@ const styles = {
     backgroundColor: "#fff",
     borderRadius: "10px",
     padding: "10px",
-    overflowX: "auto"
+    overflowX: "auto",
+    overflowY: "visible"
   },
   table: {
     width: "100%",
@@ -832,10 +986,12 @@ const styles = {
     border: "1px solid #ddd"
   },
   tableSelect: {
-    width: "100%",
-    padding: "5px",
+    width: "180px",
+    minWidth: "180px",
+    padding: "8px",
     borderRadius: "5px",
-    border: "1px solid #ddd"
+    border: "1px solid #ddd",
+    boxSizing: "border-box"
   },
   removeBtn: {
     backgroundColor: "#fff",
