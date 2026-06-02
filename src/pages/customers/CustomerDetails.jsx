@@ -302,7 +302,10 @@ const CustomerDetails = () => {
                                                                         customerName: invoice.customerName,
 
                                                                         items: (invoice.products || []).map(p => ({
-                                                                            productName: p.productName,
+                                                                            productName:
+                                                                                p.productId?.name ||
+                                                                                "Unknown Product",
+
                                                                             qty: p.qty,
                                                                             rate: p.rate,
                                                                             discount: p.discount || 0,
@@ -485,8 +488,8 @@ const CustomerDetails = () => {
                                         <th style={styles.th}>Date</th>
                                         <th style={styles.th}>Type</th>
                                         <th style={styles.th}>Reference</th>
-                                        <th style={styles.th}>Added</th>
-                                        <th style={styles.th}>Deducted</th>
+                                        <th style={styles.th}>Debit</th>
+                                        <th style={styles.th}>Credit</th>
                                         <th style={styles.th}>Due</th>
                                         <th style={styles.th}>Advance</th>
                                         <th style={styles.th}>Description</th>
@@ -504,15 +507,15 @@ const CustomerDetails = () => {
                                             </td>
                                         </tr>
                                     ) : (
-                                        [...ledgerEntries]
-                                            .reverse()
-                                            .map(
-                                                (entry, index) => (
+                                            [...ledgerEntries]
+                                                .reverse()
+                                                .map(
+                                                    (entry, index) => (
                                                     <tr key={index}>
                                                         <td style={styles.td}>
                                                             {new Date(
                                                                 entry.date
-                                                            ).toLocaleDateString()}
+                                                            ).toLocaleDateString("en-GB")}
                                                         </td>
 
                                                         <td
@@ -527,26 +530,21 @@ const CustomerDetails = () => {
                                                         </td>
 
                                                         <td style={styles.td}>
-                                                            {entry.reference}
+                                                            {entry.reference || "-"}
                                                         </td>
 
                                                         <td style={styles.td}>
 
-                                                            {entry.type === "Return (Cash)"
-                                                                ? "-"
-                                                                : entry.debit
-                                                                    ? `₹ ${entry.debit}`
-                                                                    : "-"}
-
+                                                            {entry.debit
+                                                                ? `₹ ${entry.debit}`
+                                                                : "-"}
                                                         </td>
 
                                                         <td style={styles.td}>
 
-                                                            {entry.type === "Return (Cash)"
-                                                                ? "-"
-                                                                : entry.credit
-                                                                    ? `₹ ${entry.credit}`
-                                                                    : "-"}
+                                                            {entry.credit
+                                                                ? `₹ ${entry.credit}`
+                                                                : "-"}
 
                                                         </td>
 
@@ -577,31 +575,7 @@ const CustomerDetails = () => {
                                                         </td>
 
                                                         <td style={styles.td}>
-
-                                                            {entry.type === "Opening Balance" &&
-                                                                "Migrated from previous system"}
-
-                                                            {entry.type === "Invoice" &&
-                                                                "Purchase added"}
-
-                                                            {entry.type === "Invoice Payment" &&
-                                                                "Payment received during invoice creation"}
-
-                                                            {entry.type === "Payment" &&
-                                                                "Customer payment received"}
-
-                                                            {entry.type === "Return (Cash)" &&
-                                                                "Cash refunded to customer"}
-
-                                                            {entry.type === "Return (Advance)" &&
-                                                                "Return adjusted against balance"}
-
-                                                            {entry.type === "Advance Used" &&
-                                                                "Advance adjusted"}
-
-                                                            {entry.type === "Advance Received" &&
-                                                                "Advance received"}
-
+                                                            {entry.notes || "-"}
                                                         </td>
                                                     </tr>
                                                 )

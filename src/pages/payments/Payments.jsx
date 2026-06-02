@@ -11,6 +11,18 @@ import {
 
 const Payments = () => {
   const [isReturn, setIsReturn] = useState(false);
+  useEffect(() => {
+
+    if (isReturn) {
+
+      setForm(prev => ({
+        ...prev,
+        paymentMode: "advance"
+      }));
+
+    }
+
+  }, [isReturn]);
   const [payments, setPayments] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -198,6 +210,10 @@ const Payments = () => {
       customerId,
       invoiceId: "",   // reset invoice when customer changes
       gstin: customer?.gstin || "",
+      paymentMode:
+        isReturn
+          ? "advance"
+          : "cash",
     });
 
     setFilteredInvoices(customerInvoices);
@@ -212,10 +228,22 @@ const Payments = () => {
     e.preventDefault();
     if (loading) return;
 
-    if (!form.customerId || !form.amount) {
+    if (!form.customerId) {
 
       toast.error(
-        "Please fill required fields"
+        "Please select customer"
+      );
+
+      return;
+    }
+
+    if (
+      !isReturn &&
+      !form.amount
+    ) {
+
+      toast.error(
+        "Please enter amount"
       );
 
       return;
@@ -235,6 +263,18 @@ const Payments = () => {
 
     try {
       setLoading(true);
+
+      console.log("PAYLOAD", {
+        customerId: form.customerId,
+        invoiceId: form.invoiceId,
+        paymentMode: isReturn
+          ? "advance"
+          : form.paymentMode,
+        type: isReturn
+          ? "return"
+          : "payment",
+      });
+
       await createPayment({
         customerId:
           form.customerId,
@@ -246,7 +286,9 @@ const Payments = () => {
           form.gstin || "",
 
         amount:
-          Number(form.amount),
+          isReturn
+            ? 0
+            : Number(form.amount),
 
         type:
           isReturn
@@ -254,7 +296,9 @@ const Payments = () => {
             : "payment",
 
         paymentMode:
-          form.paymentMode,
+          isReturn
+            ? "advance"
+            : form.paymentMode,
 
         reference:
           form.reference,
@@ -287,7 +331,10 @@ const Payments = () => {
 
         amount: "",
 
-        paymentMode: "cash",
+        paymentMode:
+          isReturn
+            ? "advance"
+            : "cash",
 
         reference: "",
 
@@ -356,6 +403,15 @@ const Payments = () => {
     fetchPayments();
   };
 
+  const selectedCustomer =
+    customers.find(
+      c => c._id === form.customerId
+    );
+
+  const hasDue =
+    Number(
+      selectedCustomer?.dueAmount || 0
+    ) > 0;
   const totalPages = Math.ceil(payments.length / itemsPerPage);
   const paginatedPayments = payments.slice(
     (currentPage - 1) * itemsPerPage,
@@ -565,36 +621,95 @@ const Payments = () => {
                 >
                   + Add More Products
                 </button>
+
+                <div
+                  style={{
+                    marginTop: "10px",
+                    padding: "10px",
+                    background: "#f8fafc",
+                    border: "1px solid #94a3b8",
+                    borderRadius: "8px"
+                  }}
+                >
+                  Return amount will be calculated
+                  automatically from the invoice
+                  product rate and quantity returned.
+                </div>
               </div>
             </>
           )}
 
           <div style={styles.formGridThird}>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Amount (₹)</label>
-              <input name="amount" type="number" min="1" style={styles.input} value={form.amount} onChange={handleChange} />
-            </div>
+
+            {!isReturn && (
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>
+                  Amount (₹)
+                </label>
+
+                <input
+                  name="amount"
+                  type="number"
+                  min="1"
+                  style={styles.input}
+                  value={form.amount}
+                  onChange={handleChange}
+                />
+              </div>
+            )}
 
             <div style={styles.inputGroup}>
-              <label style={styles.label}>Payment Mode</label>
+              <label style={styles.label}>
+                Payment Mode
+              </label>
+
               <div style={styles.radioGroup}>
-                <label><input type="radio" name="paymentMode" value="cash" checked={form.paymentMode === "cash"} onChange={handleChange} /> Cash</label>
-                <label><input type="radio" name="paymentMode" value="upi" checked={form.paymentMode === "upi"} onChange={handleChange} /> UPI</label>
+
+                {!isReturn && (
+                  <>
+                    <label>
+                      <input
+                        type="radio"
+                        name="paymentMode"
+                        value="cash"
+                        checked={
+                          form.paymentMode === "cash"
+                        }
+                        onChange={handleChange}
+                      />
+                      Cash
+                    </label>
+
+                    <label>
+                      <input
+                        type="radio"
+                        name="paymentMode"
+                        value="upi"
+                        checked={
+                          form.paymentMode === "upi"
+                        }
+                        onChange={handleChange}
+                      />
+                      UPI
+                    </label>
+                  </>
+                )}
+
                 {isReturn && (
                   <label>
                     <input
                       type="radio"
                       name="paymentMode"
                       value="advance"
-                      checked={form.paymentMode === "advance"}
-                      onChange={handleChange}
+                      checked={true}
+                      readOnly
                     />
                     Advance
                   </label>
                 )}
+
               </div>
             </div>
-
             <div style={styles.inputGroup}>
               <label style={styles.label}>Reference ID</label>
               <input name="reference" style={styles.input} value={form.reference} onChange={handleChange} />

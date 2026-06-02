@@ -1,0 +1,1 @@
+import{j as s}from"./index.BKdzhpdj.js";const e=({title:e,subtitle:a})=>s.jsxs("div",{className:"data-loader",children:[s.jsx("div",{className:"loader-spinner"}),s.jsxs("div",{children:[s.jsx("div",{className:"loader-title",children:e}),s.jsx("div",{className:"loader-subtitle",children:a})]})]});export{e as D};
