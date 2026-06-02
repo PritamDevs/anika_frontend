@@ -668,14 +668,19 @@ const CreateInvoice = () => {
                           }}
                         >
                           {products
-                            .filter(p =>
-                              item.productSearch === "" ||
-                              p.name
-                                .toLowerCase()
-                                .includes(
-                                  item.productSearch.toLowerCase()
-                                )
-                            )
+                            .filter(p => {
+
+                              const search =
+                                item.productSearch.toLowerCase().trim();
+
+                              return (
+                                search === "" ||
+                                p.name
+                                  .toLowerCase()
+                                  .startsWith(search)
+                              );
+
+                            })
                             .map(p => (
                               <div
                                 key={p._id}
