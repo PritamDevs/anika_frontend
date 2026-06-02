@@ -4,7 +4,7 @@ import HoverButton from "../../components/common/HoverButton";
 import { socket } from "../../socket";
 import toast from "react-hot-toast";
 import { getAllCustomers, createCustomer } from "../../services/customerService";
-import { getAllProducts } from "../../services/productService";
+import { getAllProductsList } from "../../services/productService";
 import { createInvoice } from "../../services/invoiceService";
 
 const CreateInvoice = () => {
@@ -25,6 +25,10 @@ const CreateInvoice = () => {
   const [previousDue, setPreviousDue] = useState(0);
   const [items, setItems] = useState([]);
   const [productDropdowns, setProductDropdowns] = useState({});
+  const [dropdownPosition, setDropdownPosition] = useState({
+    top: 0,
+    left: 0
+  });
   const [paidAmount, setPaidAmount] = useState(0);
   const advanceAmount =
     selectedCustomer?.advanceAmount || 0;
@@ -86,7 +90,7 @@ const CreateInvoice = () => {
     try {
 
       const products =
-        await getAllProducts();
+        await getAllProductsList();
 
       const sortedProducts =
         [...products].sort(
@@ -630,27 +634,36 @@ const CreateInvoice = () => {
                             [i]: true
                           }));
                         }}
-                        onFocus={() =>
+                        onFocus={(e) => {
+
+                          const rect =
+                            e.target.getBoundingClientRect();
+
+                          setDropdownPosition({
+                            top: rect.bottom + 5,
+                            left: rect.left
+                          });
+
                           setProductDropdowns(prev => ({
                             ...prev,
                             [i]: true
-                          }))
-                        }
+                          }));
+                        }}
                       />
 
                       {productDropdowns[i] && (
                         <div
                           style={{
-                            position: "absolute",
-                            top: "38px",
-                            left: 0,
-                            width: "250px",
+                            position: "fixed",
+                            top: dropdownPosition.top,
+                            left: dropdownPosition.left,
+                            width: "300px",
                             background: "#fff",
                             border: "1px solid #cbd5e1",
                             borderRadius: "8px",
-                            maxHeight: "200px",
+                            maxHeight: "250px",
                             overflowY: "auto",
-                            zIndex: 99999,
+                            zIndex: 999999,
                             boxShadow: "0 6px 20px rgba(0,0,0,0.15)"
                           }}
                         >

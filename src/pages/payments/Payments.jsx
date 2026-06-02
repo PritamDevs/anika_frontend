@@ -2,12 +2,8 @@ import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import {getAllCustomers} from "../../services/customerService";
 import {getAllInvoices} from "../../services/invoiceService";
-import {getAllProducts} from "../../services/productService";
-import {
-  getAllPayments,
-  createPayment,
-  updatePayment
-} from "../../services/paymentService";
+import {getAllProductsList} from "../../services/productService"; 
+import {getAllPayments,createPayment,updatePayment} from "../../services/paymentService";
 
 const Payments = () => {
   const [isReturn, setIsReturn] = useState(false);
@@ -116,7 +112,7 @@ const Payments = () => {
     const fetchProducts = async () => {
       try {
         const data =
-          await getAllProducts();
+          await getAllProductsList();
 
         setProducts(data);
       } catch (err) {

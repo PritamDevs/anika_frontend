@@ -43,11 +43,13 @@ export const updateProduct = async (
     return response.data;
 };
 
-export const getAllProducts =
+export const getAllProductsList =
     async () => {
 
         const { data } =
-            await api.get("/api/products");
+            await api.get(
+                "/api/products/all"
+            );
 
-        return data.products || data;
+        return data.products || [];
     };
