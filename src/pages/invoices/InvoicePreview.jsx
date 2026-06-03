@@ -275,10 +275,8 @@ body.thermal-print .divider{
                 <div className="divider"></div>
 
                 <div className="product">
-                  (item.productName || item.name || "PRODUCT")
-                  .toUpperCase()
+                  {(item.productName || item.name || "PRODUCT").toUpperCase()}
                 </div>
-
                 <div className="line">
                   <span>{item.qty} x {item.rate}</span>
                   <span>Disc {item.discount}%</span>
