@@ -1,8 +1,8 @@
-import { useState, useEffect,useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { socket } from "../../socket";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { BACKEND_URL } from "../../config/index.js";
+import api from "../../services/api";
 import {
   getCustomers,
   deleteCustomer,
@@ -29,7 +29,7 @@ const Customers = () => {
     address: "",
   });
 
-  const fetchCustomers = async (page = 1, search = "") => {
+  const fetchCustomers = useCallback(async (page = 1, search = "") => {
     setLoading(true);
 
     try {
@@ -50,7 +50,7 @@ const Customers = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const currentPageRef = useRef(currentPage);
 const searchTermRef  = useRef(searchTerm);
@@ -154,13 +154,9 @@ useEffect(() => {
   };
 
   const exportCustomersToCSV = async () => {
-  const token = localStorage.getItem("token");
   try {
-    const res = await fetch(
-      `${BACKEND_URL}/api/customers?page=1&limit=100000&search=${searchTerm}`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    const data = await res.json();
+    const res = await api.get(`/api/customers?page=1&limit=100000&search=${searchTerm}`);
+    const data = res.data;
     const allCustomers = data.customers;
 
     if (!allCustomers.length) {

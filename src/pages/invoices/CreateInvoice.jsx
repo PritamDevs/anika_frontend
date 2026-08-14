@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import HoverButton from "../../components/common/HoverButton";
 import { socket } from "../../socket";
@@ -60,7 +60,7 @@ const CreateInvoice = () => {
     fetchProducts();
   }, []);
 
-  const fetchCustomers = async () => {
+  const fetchCustomers = useCallback(async () => {
     try {
       const customers =
         await getAllCustomers();
@@ -84,9 +84,9 @@ const CreateInvoice = () => {
         "Failed to load customers"
       );
     }
-  };
+  }, []);
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
 
       const products =
@@ -118,7 +118,7 @@ const CreateInvoice = () => {
         "Failed to load products"
       );
     }
-  };
+  }, []);
   /* ---- Handlers ---- */
 
   const handleCustomerChange = async (id) => {
@@ -274,6 +274,13 @@ const CreateInvoice = () => {
       return;
     }
 
+    const hasZeroQty = items.some(item => Number(item.qty) <= 0);
+    if (hasZeroQty) {
+      toast.error("All products must have a quantity greater than zero");
+      setLoading(false);
+      return;
+    }
+
     try {
       const data =
         await createInvoice({
@@ -402,11 +409,18 @@ const CreateInvoice = () => {
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
 
   useEffect(() => {
+    let timeoutId;
     const handleResize = () => {
-      setIsDesktop(window.innerWidth >= 768);
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setIsDesktop(window.innerWidth >= 768);
+      }, 150);
     };
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   useEffect(() => {

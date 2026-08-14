@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useMemo } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, BarChart, Bar } from "recharts";
-import { BACKEND_URL } from "../../config/index.js";
+import api from "../../services/api";
 import { socket } from "../../socket";
 
 
@@ -42,7 +42,6 @@ const Dashboard = () => {
   const currentYear = new Date().getFullYear();
 
   const [selectedYear, setSelectedYear] = useState(currentYear);
-  const [availableYears, setAvailableYears] = useState([currentYear]);
   const currentMonth = new Date().getMonth() + 1;
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
 
@@ -75,61 +74,32 @@ const Dashboard = () => {
   }, [selectedYear]);
   const fetchMonthlySales = async (year) => {
     try {
-      const res = await fetch(
-        `${BACKEND_URL}/api/dashboard/monthly-sales?year=${year}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-      const data = await res.json();
+      const res = await api.get(`/api/dashboard/monthly-sales?year=${year}`);
+      const data = res.data;
       if (!data || data.length === 0) {
         setMonthlySales([]);
         return;
       }
-
       setMonthlySales(data);
     } catch (err) {
-
-      console.error(
-        "Monthly Sales Error:",
-        err
-      );
+      console.error("Monthly Sales Error:", err);
     }
   };
 
   const fetchTopCustomers = async () => {
     try {
-      const res = await fetch(
-        `${BACKEND_URL}/api/dashboard/top-customers`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-      const data = await res.json();
+      const res = await api.get(`/api/dashboard/top-customers`);
+      const data = res.data;
       setTopCustomers(data);
     } catch (err) {
-
-      console.error(
-        "Top Customers Error:",
-        err
-      );
+      console.error("Top Customers Error:", err);
     }
   };
 
-
-
   const fetchDashboardData = async (year = selectedYear, month = selectedMonth) => {
     try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${BACKEND_URL}/api/dashboard?year=${year}&month=${month}&t=${Date.now()}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (!res.ok) throw new Error("Unauthorized or failed request");
-      const data = await res.json();
+      const res = await api.get(`/api/dashboard?year=${year}&month=${month}&t=${Date.now()}`);
+      const data = res.data;
       setStats({
         totalSales: data.totalSales ?? 0,
         totalOutstanding: data.totalOutstanding ?? 0,
@@ -138,11 +108,7 @@ const Dashboard = () => {
       });
       setLowStockData(data.lowStockProducts ?? []);
     } catch (error) {
-
-      console.error(
-        "Dashboard fetch error:",
-        error
-      );
+      console.error("Dashboard fetch error:", error);
     }
   };
 

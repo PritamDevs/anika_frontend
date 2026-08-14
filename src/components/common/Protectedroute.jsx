@@ -1,4 +1,5 @@
 import { Navigate, Outlet } from "react-router-dom";
+import { useEffect } from "react";
 
 const isTokenExpired = (token) => {
   try {
@@ -12,8 +13,13 @@ const isTokenExpired = (token) => {
 const ProtectedRoute = () => {
   const token = localStorage.getItem("token");
   
+  useEffect(() => {
+    if (!token || isTokenExpired(token)) {
+      localStorage.removeItem("token");
+    }
+  }, [token]);
+  
   if (!token || isTokenExpired(token)) {
-    localStorage.removeItem("token");
     return <Navigate to="/" replace />; 
   }
 
